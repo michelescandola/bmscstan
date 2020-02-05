@@ -1,12 +1,24 @@
 Package: BMSC
 Type: Package
-Title: What the Package Does (Title Case)
+Title: BMSC: Bayesian Multilevel Single Case models using 'Stan'
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Michele Scandola
+Maintainer: Michele Scandola <michele.scandola@univr.it>
+Description: This is a package to analyse single case analyses against a control group.
+    The purpose of this package is to provide a flexible, with good power and low first type error
+    approach that can manage at the same time controls' and patient's data.
+    The use of Bayesian statistics allows to test both the alternative and null hypothesis.
+License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
+Depends: R (>= 3.5.1), rstan, logspline, bayesplot, LaplacesDemon
+Imports: coda
+Suggests:
+    ggplot2,
+    reshape2,
+    gridExtra,
+    loo,
+    mcmcse,
+    bridgesampling,
+    testthat
 RoxygenNote: 7.0.1
