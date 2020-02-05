@@ -4,7 +4,7 @@
 \alias{pp_check.BMSC}
 \title{Posterior predictive checks for BMSC objects}
 \usage{
-pp_check.BMSC(object, type = "dens", limited = TRUE)
+\method{pp_check}{BMSC}(object, type = "dens", limited = TRUE)
 }
 \arguments{
 \item{object}{a BMSC object}
