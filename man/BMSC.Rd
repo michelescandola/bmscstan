@@ -31,9 +31,9 @@ If NA (the default), Stan will set the seed randomly.}
 
 \item{typeprior}{Set the desired prior distribution for the fixed effects.
 \describe{
-     \item{normal} a normal distribution with \mu = 0 and \sigma = 10
-     \item{cauchy} a cauchy distribution with \mu = 0 and scale \sqrt(2)/2
-     \item{student} a Student's T distribution, with \mu = 0, \nu = 3 and \sigma = 10
+     \item{normal} {a normal distribution with \eqn{\mu = 0} and \eqn{\sigma = 10}}
+     \item{cauchy} {a cauchy distribution with \eqn{\mu = 0} and scale \eqn{\sqrt{2}/2}}
+     \item{student} {a Student's T distribution, with \eqn{\mu = 0}, \eqn{\nu = 3} and \eqn{\sigma = 10}}
  }
  The normal distribution is the default.}
 
@@ -44,7 +44,7 @@ The \strong{BMSC} package provides an interface to fit Bayesian Multilevel Singl
 These models compare the performance of a single patient against a control group, combining
 the flexibility of multilevel models and the potentiality of Bayesian Statistics.
 
-\code{bmscfit} fits the Bayesian Multilevel Single Case models.
+\code{BMSC} fits the Bayesian Multilevel Single Case models.
 }
 \details{
 The package is now limited to gaussian data only, but we will further expand it to cover
@@ -55,18 +55,18 @@ patient and the group will be esimated.
 
 The model to estimate the controls parameters is:
 
-\deqn{y~\mathcal{N}(\beta X + b Z, \sigma^2)}
+\deqn{y~N(\beta X + b Z, \sigma^2)}
 
 where $y$ is the controls' dependent variable, $X$ the contrast matrix for Population-level (or Fixed)
-Effects, and $\beta$ are the unknown coefficients to be estimate. $Z$ is the contrast matrix for the
+Effects, and $\\beta$ are the unknown coefficients to be estimate. $Z$ is the contrast matrix for the
 Varying (or Random, or Group-level) effects, and $b$ are the unknown estimates for the varying effects.
-$\sigma^2$ is the variance.
+$\\sigma^2$ is the variance.
 
 In order to estimate the coefficients of the patient, the formula is the following:
 
 \deqn{y_{pt}~\mathcal{N}(\phi X_{pt}, \sigma_{pt}^2)}
 
-where $\phi = \beta + \delta$.
+where \eqn{\phi = \beta + \delta}.
 }
 \section{Details}{
 

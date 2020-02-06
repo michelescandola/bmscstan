@@ -10,9 +10,9 @@
 \item{object}{a BMSC object}
 
 \item{type}{\describe{
-    \item{dens} density overlay plot
-    \item{hist} histogram plot
-    \item{mean} the distribution of the mean statistic, over the simulated datasets, compared to the mean of the real data
+    \item{dens} {density overlay plot}
+    \item{hist} {histogram plot}
+    \item{mean} {the distribution of the mean statistic, over the simulated datasets, compared to the mean of the real data}
 }}
 
 \item{limited}{logical. TRUE if the output should be limited within 4 standard deviations, FALSE it should not. default TRUE}

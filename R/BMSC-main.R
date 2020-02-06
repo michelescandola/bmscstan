@@ -12,22 +12,24 @@
 #'
 #' The model to estimate the controls parameters is:
 #'
-#' \deqn{y~\mathcal{N}(\beta X + b Z, \sigma^2)}
+#' \deqn{y~N(\beta X + b Z, \sigma^2)}
 #'
 #' where $y$ is the controls' dependent variable, $X$ the contrast matrix for Population-level (or Fixed)
-#' Effects, and $\beta$ are the unknown coefficients to be estimate. $Z$ is the contrast matrix for the
+#' Effects, and $\\beta$ are the unknown coefficients to be estimate. $Z$ is the contrast matrix for the
 #' Varying (or Random, or Group-level) effects, and $b$ are the unknown estimates for the varying effects.
-#' $\sigma^2$ is the variance.
+#' $\\sigma^2$ is the variance.
 #'
 #' In order to estimate the coefficients of the patient, the formula is the following:
 #'
 #' \deqn{y_{pt}~\mathcal{N}(\phi X_{pt}, \sigma_{pt}^2)}
 #'
-#' where $\phi = \beta + \delta$.
+#' where \eqn{\phi = \beta + \delta}.
 #'
 #' @section Details:
 #' The main function of \strong{BMSC} is \code{\link{BMSC}}, which uses formula syntax to
 #' specify your model.
+#'
+#' @import rstan logspline bayesplot LaplacesDemon
 #'
 #' @docType package
 #' @name BMSC
@@ -36,7 +38,7 @@ NULL
 
 #' Fit Bayesian Multilevel Single Case models
 #'
-#' \code{bmscfit} fits the Bayesian Multilevel Single Case models.
+#' \code{BMSC} fits the Bayesian Multilevel Single Case models.
 #'
 #' @usage BMSC(formula, data.ctrl, data.pt, cores = 1, chains = 4, warmup = 2000,
 #'             iter = 4000, seed = NA, ...)
@@ -56,9 +58,9 @@ NULL
 #' If NA (the default), Stan will set the seed randomly.
 #' @param typeprior Set the desired prior distribution for the fixed effects.
 #'    \describe{
-#'         \item{normal} a normal distribution with \mu = 0 and \sigma = 10
-#'         \item{cauchy} a cauchy distribution with \mu = 0 and scale \sqrt(2)/2
-#'         \item{student} a Student's T distribution, with \mu = 0, \nu = 3 and \sigma = 10
+#'         \item{normal} {a normal distribution with \eqn{\mu = 0} and \eqn{\sigma = 10}}
+#'         \item{cauchy} {a cauchy distribution with \eqn{\mu = 0} and scale \eqn{\sqrt{2}/2}}
+#'         \item{student} {a Student's T distribution, with \eqn{\mu = 0}, \eqn{\nu = 3} and \eqn{\sigma = 10}}
 #'     }
 #'     The normal distribution is the default.
 #' @param ... further arguments to be passed to \strong{stan} function.
