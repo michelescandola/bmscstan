@@ -14,10 +14,10 @@
 #'
 #' \deqn{y~N(\beta X + b Z, \sigma^2)}
 #'
-#' where $y$ is the controls' dependent variable, $X$ the contrast matrix for Population-level (or Fixed)
-#' Effects, and $\\beta$ are the unknown coefficients to be estimate. $Z$ is the contrast matrix for the
-#' Varying (or Random, or Group-level) effects, and $b$ are the unknown estimates for the varying effects.
-#' $\\sigma^2$ is the variance.
+#' where \eqn{y} is the controls' dependent variable, \eqn{X} the contrast matrix for Population-level (or Fixed)
+#' Effects, and \eqn{\beta} are the unknown coefficients to be estimate. \eqn{Z} is the contrast matrix for the
+#' Varying (or Random, or Group-level) effects, and \eqn{b} are the unknown estimates for the varying effects.
+#' \eqn{\sigma^2} is the variance.
 #'
 #' In order to estimate the coefficients of the patient, the formula is the following:
 #'
@@ -29,10 +29,10 @@
 #' The main function of \strong{BMSC} is \code{\link{BMSC}}, which uses formula syntax to
 #' specify your model.
 #'
-#' @import rstan logspline bayesplot LaplacesDemon
+#' @import rstan logspline bayesplot LaplacesDemon stats ggplot2
 #'
 #' @docType package
-#' @name BMSC
+#' @name BMSC-package
 NULL
 
 
@@ -40,14 +40,13 @@ NULL
 #'
 #' \code{BMSC} fits the Bayesian Multilevel Single Case models.
 #'
-#' @usage BMSC(formula, data.ctrl, data.pt, cores = 1, chains = 4, warmup = 2000,
-#'             iter = 4000, seed = NA, ...)
 #'
 #' @param formula An object of class \code{formula}: a symbolic description of the model to be fitted.
 #' @param data.ctrl An object of class \code{data.frame} (or one that can be coerced to that class)
 #' containing data of all variables used in the model for the control group.
 #' @param data.pt An object of class \code{data.frame} (or one that can be coerced to that class)
 #' containing data of all variables used in the model for the patient.
+#' @param cores The number of cores to use when executing the Markov chains in parallel. The default is 1.
 #' @param chains Number of Markov chains (defaults to 4).
 #' @param iter Number of total iterations per chain (including warmup; defaults to 4000).
 #' @param warmup A positive integer specifying number of warmup (aka burnin) iterations.
@@ -57,16 +56,16 @@ NULL
 #' @param seed The seed for random number generation to make results reproducible.
 #' If NA (the default), Stan will set the seed randomly.
 #' @param typeprior Set the desired prior distribution for the fixed effects.
-#'    \describe{
-#'         \item{normal} {a normal distribution with \eqn{\mu = 0} and \eqn{\sigma = 10}}
-#'         \item{cauchy} {a cauchy distribution with \eqn{\mu = 0} and scale \eqn{\sqrt{2}/2}}
-#'         \item{student} {a Student's T distribution, with \eqn{\mu = 0}, \eqn{\nu = 3} and \eqn{\sigma = 10}}
-#'     }
-#'     The normal distribution is the default.
+#' \describe{
+#' \item{normal}{a normal distribution with \eqn{\mu = 0} and \eqn{\sigma = 10}}
+#' \item{cauchy}{a cauchy distribution with \eqn{\mu = 0} and scale \eqn{\sqrt{2}/2}}
+#' \item{student}{a Student's T distribution, with \eqn{\mu = 0}, \eqn{\nu = 3} and \eqn{\sigma = 10}}
+#' }
+#' The normal distribution is the default.
 #' @param ... further arguments to be passed to \strong{stan} function.
 #'
 #' @export
-BMSC <- function(formula,data.ctrl,data.pt,
+BMSC <- function(formula, data.ctrl, data.pt,
                 cores = 1, chains = 4, warmup = 2000,
                 iter = 4000, seed = NA, typeprior = "normal",
                 ...){
@@ -318,6 +317,7 @@ BMSC <- function(formula,data.ctrl,data.pt,
 #' Computes log marginal likelihood via bridge sampling.
 #'
 #' @param object a BMSC object
+#' @param ... further arguments passed to or from other methods.
 #' @return an "psis_loo" "loo" object
 #' @export
 

@@ -8,6 +8,8 @@ bridge_sampler.BMSC(object, ...)
 }
 \arguments{
 \item{object}{a BMSC object}
+
+\item{...}{further arguments passed to or from other methods.}
 }
 \value{
 an "psis_loo" "loo" object

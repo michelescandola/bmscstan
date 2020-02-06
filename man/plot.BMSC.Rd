@@ -4,27 +4,29 @@
 \alias{plot.BMSC}
 \title{Plot estimates from a \code{BMSC} object.}
 \usage{
-plot(object, who = 'both', type = 'interval')
+\method{plot}{BMSC}(x, who = "both", type = "interval", CI = 0.95, ...)
 }
 \arguments{
+\item{x}{An object of class \link{\code{BMSC}}.}
+
 \item{who}{parameter to choose the estimates to plot
 \describe{
-    \item{both} {plot in the same graph both controls and the patient}
-    \item{control} {only the controls}
-    \item{patient} {only the patient \eqn{(\beta + \delta)}}
-    \item{delta} {only the difference between the patient and controls}
+        \item{both}{plot in the same graph both controls and the patient}
+        \item{control}{only the controls}
+        \item{patient}{only the patient \eqn{(\beta + \delta)}}
+        \item{delta}{only the difference between the patient and controls}
 }}
 
 \item{type}{a parameter to select the typology of graph
 \describe{
-    \item{interval} {the estimates will be represented by means of pointrange, with median and the boundaries of the credible interval}
-    \item{area} {a density plot}
-    \item{hist} {a density histogram}
+        \item{interval}{the estimates will be represented by means of pointrange, with median and the boundaries of the credible interval}
+        \item{area}{a density plot}
+        \item{hist}{a density histogram}
 }}
 
-\item{CI}{the dimension of the Credible Interval}
+\item{CI}{the dimension of the Credible Interval (or Equally Tailed Interval). Default 0.95.}
 
-\item{object}{An object of class \code{BMSC}.}
+\item{...}{other arguments are ignored.}
 }
 \value{
 a plot, a ggplot2 object, or a bayesplot object

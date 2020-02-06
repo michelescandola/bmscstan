@@ -4,18 +4,20 @@
 \alias{pp_check.BMSC}
 \title{Posterior predictive checks for BMSC objects}
 \usage{
-\method{pp_check}{BMSC}(object, type = "dens", limited = TRUE)
+\method{pp_check}{BMSC}(object, type = "dens", limited = TRUE, ...)
 }
 \arguments{
 \item{object}{a BMSC object}
 
 \item{type}{\describe{
-    \item{dens} {density overlay plot}
-    \item{hist} {histogram plot}
-    \item{mean} {the distribution of the mean statistic, over the simulated datasets, compared to the mean of the real data}
+    \item{dens}{density overlay plot}
+    \item{hist}{histogram plot}
+    \item{mean}{the distribution of the mean statistic, over the simulated datasets, compared to the mean of the real data}
 }}
 
 \item{limited}{logical. TRUE if the output should be limited within 4 standard deviations, FALSE it should not. default TRUE}
+
+\item{...}{other arguments are ignored.}
 }
 \value{
 a ggplot2 object
