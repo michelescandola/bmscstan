@@ -35,6 +35,36 @@
 #' @name BMSC-package
 NULL
 
+#' Data from a patient with brachial plexious lesion
+#'
+#' A dataset containing the results from the Body Sidednedd Task
+#' from a single patient
+#'
+#' @format A data frame with 467 rows and 4 variables
+#' \describe{
+#'  \item{RT}{Reaction times, in milliseconds}
+#'  \item{Body.District}{Body district, categorial factor of
+#'        Body Sidedness Task: FOOT or HAND}
+#'  \item{Congruency}{The trail was Congruent or Incongruent?}
+#'  \item{Side}{The trial showed a left or right limb}
+#' }
+"data.pt"
+
+#' Data from a control group of 16 participants
+#'
+#' A dataset containing the results from the Body Sidednedd Task
+#' from a control group of 16 participants
+#'
+#' @format A data frame with 4049 rows and 5 variables
+#' \describe{
+#'  \item{RT}{Reaction times, in milliseconds}
+#'  \item{Body.District}{Body district, categorial factor of
+#'        Body Sidedness Task: FOOT or HAND}
+#'  \item{Congruency}{The trail was Congruent or Incongruent?}
+#'  \item{Side}{The trial showed a left or right limb}
+#'  \item{ID}{The participant ID}
+#' }
+"data.ctrl"
 
 #' Fit Bayesian Multilevel Single Case models
 #'
