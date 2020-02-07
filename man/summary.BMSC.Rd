@@ -7,9 +7,12 @@
 \method{summary}{BMSC}(object, ...)
 }
 \arguments{
-\item{object}{An object of class \code{BMSC}, resulting from the \link{\code{BMSC}} function.}
+\item{object}{An object of class \code{BMSC}, resulting from the \link{BMSC} function.}
 
 \item{...}{other arguments are ignored.}
+}
+\value{
+a \code{summary.BMSC} object
 }
 \description{
 summary method for class "BMSC".

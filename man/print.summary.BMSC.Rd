@@ -7,7 +7,7 @@
 \method{print}{summary.BMSC}(x, ...)
 }
 \arguments{
-\item{x}{An object of class \code{summary.BMSC}, resulting from the \link{\code{summary.BMSC}} function.}
+\item{x}{An object of class \code{summary.BMSC}, resulting from the \link{summary.BMSC} function.}
 
 \item{...}{further arguments passed to or from other methods.}
 }

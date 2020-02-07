@@ -65,7 +65,7 @@ pp_check.BMSC = function(object, type = "dens", limited = TRUE, ...) {
 
 #' Plot estimates from a \code{BMSC} object.
 #'
-#' @param x An object of class \link{\code{BMSC}}.
+#' @param x An object of class \link{BMSC}.
 #' @param who parameter to choose the estimates to plot
 #' \describe{
 #'         \item{both}{plot in the same graph both controls and the patient}

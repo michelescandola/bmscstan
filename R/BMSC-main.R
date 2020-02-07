@@ -42,9 +42,9 @@ NULL
 #'
 #'
 #' @param formula An object of class \code{formula}: a symbolic description of the model to be fitted.
-#' @param data.ctrl An object of class \code{data.frame} (or one that can be coerced to that class)
+#' @param data_ctrl An object of class \code{data.frame} (or one that can be coerced to that class)
 #' containing data of all variables used in the model for the control group.
-#' @param data.pt An object of class \code{data.frame} (or one that can be coerced to that class)
+#' @param data_pt An object of class \code{data.frame} (or one that can be coerced to that class)
 #' containing data of all variables used in the model for the patient.
 #' @param cores The number of cores to use when executing the Markov chains in parallel. The default is 1.
 #' @param chains Number of Markov chains (defaults to 4).
@@ -64,8 +64,10 @@ NULL
 #' The normal distribution is the default.
 #' @param ... further arguments to be passed to \strong{stan} function.
 #'
+#' @return a \code{BMSC} object
+#'
 #' @export
-BMSC <- function(formula, data.ctrl, data.pt,
+BMSC <- function(formula, data_ctrl, data_pt,
                 cores = 1, chains = 4, warmup = 2000,
                 iter = 4000, seed = NA, typeprior = "normal",
                 ...){
@@ -90,9 +92,9 @@ BMSC <- function(formula, data.ctrl, data.pt,
 
   fix.formula     <- paste0(" ~",mypaste(fix.terms))
 
-  matrix.fix.ctrl <- model.matrix(as.formula(fix.formula),data.ctrl)
+  matrix.fix.ctrl <- model.matrix(as.formula(fix.formula),data_ctrl)
 
-  matrix.fix.pt   <- model.matrix(as.formula(fix.formula),data.pt)
+  matrix.fix.pt   <- model.matrix(as.formula(fix.formula),data_pt)
 
   # build contrasts matrices for random effects
   ran.terms       <- form.terms[(grepl("\\|",form.terms))]
@@ -102,19 +104,19 @@ BMSC <- function(formula, data.ctrl, data.pt,
   for(ran in ran.terms){
     tmp <- unlist(strsplit(ran,"\\|"))
     grouping[[ran]] <- trimws(tmp[2])
-    ran.matrices[[ran]] <- model.matrix(as.formula(paste0(" ~",mypaste(tmp[1]))),data.ctrl)
+    ran.matrices[[ran]] <- model.matrix(as.formula(paste0(" ~",mypaste(tmp[1]))),data_ctrl)
   }
 
   stancode <- .building.model(ran.matrices,typeprior)
 
   datalist <- .building.data.list(ran.matrices,grouping,matrix.fix.ctrl,
-                                 matrix.fix.pt,data.ctrl,data.pt,formula)
+                                 matrix.fix.pt,data_ctrl,data_pt,formula)
 
   mdl <- stan(model_code = stancode, data = datalist, iter = iter,
              chains = chains,cores = cores, warmup = warmup,
              seed = seed, ...)
 
-  out <- list(formula,mdl,data.pt,data.ctrl,datalist,stancode,typeprior)
+  out <- list(formula,mdl,data_pt,data_ctrl,datalist,stancode,typeprior)
 
   class(out) <- append(class(out),"BMSC")
 
@@ -274,12 +276,12 @@ BMSC <- function(formula, data.ctrl, data.pt,
 
 .building.data.list <- function(ran.matrices = NULL, grouping,
                                matrix.fix.ctrl, matrix.fix.pt,
-                               data.ctrl, data.pt, formula){
+                               data_ctrl, data_pt, formula){
   data.list <- list(
     Nparameters = ncol(matrix.fix.ctrl),
 
-    y_Ctrl=data.ctrl[,as.character(formula[2])],
-    y_Pts =data.pt[,as.character(formula[2])],
+    y_Ctrl=data_ctrl[,as.character(formula[2])],
+    y_Pts =data_pt[,as.character(formula[2])],
 
     XF_Ctrl=matrix.fix.ctrl,
     XF_Pts =matrix.fix.pt,
@@ -299,12 +301,12 @@ BMSC <- function(formula, data.ctrl, data.pt,
 
         data.list[[paste0("Nrands",ir)]]    <- ncol(ran)
         data.list[[paste0("XR_Ctrl",ir)]]   <- ran
-        data.list[[paste0("grouping",ir)]]  <- as.numeric(data.ctrl[,grouping[[ir]]])
-        data.list[[paste0("Ngrouping",ir)]] <- length(unique(data.ctrl[,grouping[[ir]]]))
+        data.list[[paste0("grouping",ir)]]  <- as.numeric(data_ctrl[,grouping[[ir]]])
+        data.list[[paste0("Ngrouping",ir)]] <- length(unique(data_ctrl[,grouping[[ir]]]))
 
       }else if(dim(ran)[2]==1){
-        data.list[[paste0("grouping",ir)]]  <- as.numeric(data.ctrl[,grouping[[ir]]])
-        data.list[[paste0("Ngrouping",ir)]] <- length(unique(data.ctrl[,grouping[[ir]]]))
+        data.list[[paste0("grouping",ir)]]  <- as.numeric(data_ctrl[,grouping[[ir]]])
+        data.list[[paste0("Ngrouping",ir)]] <- length(unique(data_ctrl[,grouping[[ir]]]))
       }
       ir <- ir + 1
     }

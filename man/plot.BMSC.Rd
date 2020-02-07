@@ -7,7 +7,7 @@
 \method{plot}{BMSC}(x, who = "both", type = "interval", CI = 0.95, ...)
 }
 \arguments{
-\item{x}{An object of class \link{\code{BMSC}}.}
+\item{x}{An object of class \link{BMSC}.}
 
 \item{who}{parameter to choose the estimates to plot
 \describe{

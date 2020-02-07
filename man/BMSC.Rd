@@ -6,8 +6,8 @@
 \usage{
 BMSC(
   formula,
-  data.ctrl,
-  data.pt,
+  data_ctrl,
+  data_pt,
   cores = 1,
   chains = 4,
   warmup = 2000,
@@ -20,10 +20,10 @@ BMSC(
 \arguments{
 \item{formula}{An object of class \code{formula}: a symbolic description of the model to be fitted.}
 
-\item{data.ctrl}{An object of class \code{data.frame} (or one that can be coerced to that class)
+\item{data_ctrl}{An object of class \code{data.frame} (or one that can be coerced to that class)
 containing data of all variables used in the model for the control group.}
 
-\item{data.pt}{An object of class \code{data.frame} (or one that can be coerced to that class)
+\item{data_pt}{An object of class \code{data.frame} (or one that can be coerced to that class)
 containing data of all variables used in the model for the patient.}
 
 \item{cores}{The number of cores to use when executing the Markov chains in parallel. The default is 1.}
@@ -49,6 +49,9 @@ If NA (the default), Stan will set the seed randomly.}
 The normal distribution is the default.}
 
 \item{...}{further arguments to be passed to \strong{stan} function.}
+}
+\value{
+a \code{BMSC} object
 }
 \description{
 \code{BMSC} fits the Bayesian Multilevel Single Case models.

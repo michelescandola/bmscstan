@@ -3,10 +3,11 @@
 #' summary method for class "BMSC".
 #'
 #'
-#' @param object An object of class \code{BMSC}, resulting from the \link{\code{BMSC}} function.
+#' @param object An object of class \code{BMSC}, resulting from the \link{BMSC} function.
 #'
 #' @param ... other arguments are ignored.
 #' @method summary BMSC
+#' @return a \code{summary.BMSC} object
 #' @export
 summary.BMSC = function(object, ...) {
 
@@ -74,7 +75,7 @@ summary.BMSC = function(object, ...) {
 #' Print summaries of Bayesian Multilevel Single Case objects
 #'
 #'
-#' @param x An object of class \code{summary.BMSC}, resulting from the \link{\code{summary.BMSC}} function.
+#' @param x An object of class \code{summary.BMSC}, resulting from the \link{summary.BMSC} function.
 #'
 #' @param ... further arguments passed to or from other methods.
 #'
