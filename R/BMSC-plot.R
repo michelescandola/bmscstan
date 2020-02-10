@@ -13,7 +13,7 @@
 #' @param ... other arguments for \code{bayesplot} methods.
 #'
 #' @examples
-#'
+#'  \dontrun{
 #' # simulation of healthy controls data
 #'
 #' Sigma.ctrl <- matrix(cbind(1, .7,  .7, 1) ,nrow=2)
@@ -73,6 +73,7 @@
 #' pp_check(mdl.reg, type = "mean", limited = FALSE)
 #'
 #' pp_check(mdl.reg, type = "hist", limited = FALSE)
+#' }
 #'
 #' @return a ggplot2 object
 #' @export
@@ -167,8 +168,6 @@ pp_check.BMSC = function(object, type = "dens", limited = FALSE, ...) {
 #'
 #'  # plot of the results
 #'  plot(mdl)
-#'  }
-#'
 #'
 #' # simulation of healthy controls data
 #'
@@ -239,6 +238,7 @@ pp_check.BMSC = function(object, type = "dens", limited = FALSE, ...) {
 #' # histograms
 #'
 #' plot(mdl.reg, type = "hist")
+#' }
 #'
 #' @return a plot, a ggplot2 object, or a bayesplot object
 #'

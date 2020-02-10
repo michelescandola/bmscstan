@@ -1,4 +1,4 @@
-#' bmscstan: Bayesian Multilevel Single Case models using 'Stan'
+#' Bayesian Multilevel Single Case models using 'Stan'
 #'
 #' The \strong{bmscstan} package provides an interface to fit Bayesian Multilevel Single Case models.
 #' These models compare the performance of a single patient against a control group, combining
@@ -116,7 +116,6 @@ NULL
 #'
 #'  # plot of the results
 #'  plot(mdl)
-#'  }
 #'
 #' # simulation of healthy controls data
 #'
@@ -167,6 +166,7 @@ NULL
 #' # summarize the data
 #'
 #' summary(mdl.reg)
+#' }
 #'
 #' @return a \code{BMSC} object
 #'
