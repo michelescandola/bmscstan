@@ -4,7 +4,7 @@
 \alias{pp_check.BMSC}
 \title{Posterior predictive checks for BMSC objects}
 \usage{
-\method{pp_check}{BMSC}(object, type = "dens", limited = TRUE, ...)
+\method{pp_check}{BMSC}(object, type = "dens", limited = FALSE, ...)
 }
 \arguments{
 \item{object}{a BMSC object}
@@ -15,7 +15,7 @@
     \item{mean}{the distribution of the mean statistic, over the simulated datasets, compared to the mean of the real data}
 }}
 
-\item{limited}{logical. TRUE if the output should be limited within 4 standard deviations, FALSE it should not. default TRUE}
+\item{limited}{logical. TRUE if the output should be limited within 4 standard deviations, FALSE it should not. default FALSE}
 
 \item{...}{other arguments for \code{bayesplot} methods.}
 }
@@ -24,4 +24,67 @@ a ggplot2 object
 }
 \description{
 \code{pp_check()} plots the posterior predictive check for BMSC objects.
+}
+\examples{
+
+# simulation of healthy controls data
+
+Sigma.ctrl <- matrix(cbind(1, .7,  .7, 1) ,nrow=2)
+
+U <- t(chol(Sigma.ctrl))
+
+numobs <- 100
+
+set.seed(123)
+
+random.normal <- matrix( rnorm( n = ncol(U) * numobs, mean = 3, sd = 1),
+                         nrow = ncol(U), ncol = numobs)
+
+X = U \%*\% random.normal
+
+dat.ctrl <- as.data.frame(t(X))
+
+names(dat.ctrl) <- c("y","x")
+
+cor(dat.ctrl)
+
+# simulation of patient data
+
+Sigma.pt <- matrix(cbind(1, 0,  0, 1) ,nrow=2)
+
+U <- t(chol(Sigma.pt))
+
+numobs <- 20
+
+set.seed(0)
+
+random.normal <- matrix( rnorm( n = ncol(U) * numobs, mean = 3, sd = 1),
+                 nrow = ncol(U), ncol = numobs)
+
+X = U \%*\% random.normal
+
+dat.pt <- as.data.frame(t(X))
+
+names(dat.pt) <- c("y","x")
+
+cor(dat.pt)
+
+# fit the single case model
+
+mdl.reg <- BMSC(y ~ x, data_ctrl = dat.ctrl, data_pt = dat.pt, seed = 10)
+
+# summarize the data
+
+summary(mdl.reg)
+
+# plot the posterior predictive checks
+
+pp_check(mdl.reg, limited = FALSE)
+
+pp_check(mdl.reg, limited = TRUE)
+
+pp_check(mdl.reg, type = "mean", limited = FALSE)
+
+pp_check(mdl.reg, type = "hist", limited = FALSE)
+
 }

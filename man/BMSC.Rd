@@ -61,13 +61,14 @@ a \code{BMSC} object
 
  data(BSE)
 
- # Normal robust regression of data coming from a body representation paradigm
- # with a control sample of 12 participants and one patient with
- # unilateral brachial plexus lesion
- mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side + (Body.District + Congruency + Side | ID),
-             data_ctrl = data.ctrl,
-             data_pt = data.pt,
-             cores = 4)
+# Normal robust regression of data coming from a body representation paradigm
+# with a control sample of 12 participants and one patient with
+# unilateral brachial plexus lesion
+mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
+            (Body.District + Congruency + Side | ID),
+            data_ctrl = data.ctrl,
+            data_pt = data.pt,
+            cores = 4)
 
  # generate a summary of the results
  summary(mdl)
@@ -78,5 +79,55 @@ a \code{BMSC} object
  # plot of the results
  plot(mdl)
  }
+
+# simulation of healthy controls data
+
+Sigma.ctrl <- matrix(cbind(1, .7,  .7, 1) ,nrow=2)
+
+U <- t(chol(Sigma.ctrl))
+
+numobs <- 100
+
+set.seed(123)
+
+random.normal <- matrix( rnorm( n = ncol(U) * numobs, mean = 3, sd = 1),
+                         nrow = ncol(U), ncol = numobs)
+
+X = U \%*\% random.normal
+
+dat.ctrl <- as.data.frame(t(X))
+
+names(dat.ctrl) <- c("y","x")
+
+cor(dat.ctrl)
+
+# simulation of patient data
+
+Sigma.pt <- matrix(cbind(1, 0,  0, 1) ,nrow=2)
+
+U <- t(chol(Sigma.pt))
+
+numobs <- 20
+
+set.seed(0)
+
+random.normal <- matrix( rnorm( n = ncol(U) * numobs, mean = 3, sd = 1),
+                 nrow = ncol(U), ncol = numobs)
+
+X = U \%*\% random.normal
+
+dat.pt <- as.data.frame(t(X))
+
+names(dat.pt) <- c("y","x")
+
+cor(dat.pt)
+
+# fit the single case model
+
+mdl.reg <- BMSC(y ~ x, data_ctrl = dat.ctrl, data_pt = dat.pt, seed = 10)
+
+# summarize the data
+
+summary(mdl.reg)
 
 }

@@ -99,13 +99,14 @@ NULL
 #'
 #'  data(BSE)
 #'
-#'  # Normal robust regression of data coming from a body representation paradigm
-#'  # with a control sample of 12 participants and one patient with
-#'  # unilateral brachial plexus lesion
-#'  mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side + (Body.District + Congruency + Side | ID),
-#'              data_ctrl = data.ctrl,
-#'              data_pt = data.pt,
-#'              cores = 4)
+#' # Normal robust regression of data coming from a body representation paradigm
+#' # with a control sample of 12 participants and one patient with
+#' # unilateral brachial plexus lesion
+#' mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
+#'             (Body.District + Congruency + Side | ID),
+#'             data_ctrl = data.ctrl,
+#'             data_pt = data.pt,
+#'             cores = 4)
 #'
 #'  # generate a summary of the results
 #'  summary(mdl)
@@ -116,6 +117,56 @@ NULL
 #'  # plot of the results
 #'  plot(mdl)
 #'  }
+#'
+#' # simulation of healthy controls data
+#'
+#' Sigma.ctrl <- matrix(cbind(1, .7,  .7, 1) ,nrow=2)
+#'
+#' U <- t(chol(Sigma.ctrl))
+#'
+#' numobs <- 100
+#'
+#' set.seed(123)
+#'
+#' random.normal <- matrix( rnorm( n = ncol(U) * numobs, mean = 3, sd = 1),
+#'                          nrow = ncol(U), ncol = numobs)
+#'
+#' X = U %*% random.normal
+#'
+#' dat.ctrl <- as.data.frame(t(X))
+#'
+#' names(dat.ctrl) <- c("y","x")
+#'
+#' cor(dat.ctrl)
+#'
+#' # simulation of patient data
+#'
+#' Sigma.pt <- matrix(cbind(1, 0,  0, 1) ,nrow=2)
+#'
+#' U <- t(chol(Sigma.pt))
+#'
+#' numobs <- 20
+#'
+#' set.seed(0)
+#'
+#' random.normal <- matrix( rnorm( n = ncol(U) * numobs, mean = 3, sd = 1),
+#'                  nrow = ncol(U), ncol = numobs)
+#'
+#' X = U %*% random.normal
+#'
+#' dat.pt <- as.data.frame(t(X))
+#'
+#' names(dat.pt) <- c("y","x")
+#'
+#' cor(dat.pt)
+#'
+#' # fit the single case model
+#'
+#' mdl.reg <- BMSC(y ~ x, data_ctrl = dat.ctrl, data_pt = dat.pt, seed = 10)
+#'
+#' # summarize the data
+#'
+#' summary(mdl.reg)
 #'
 #' @return a \code{BMSC} object
 #'
@@ -138,7 +189,7 @@ BMSC <- function(formula, data_ctrl, data_pt,
   if(missing(data_ctrl)) stop("the dataframe \"data_ctrl\" is not specified")
   if(missing(data_pt)) stop("the dataframe \"data_pt\" is not specified")
   if(typeprior!="normal"&&typeprior!="cauchy"&&typeprior!="student")
-    stop("Not a valid typeprior")
+      stop("Not a valid typeprior")
 
   # extract formula's terms
   form.terms      <- attributes(terms(formula))$term.labels
@@ -299,7 +350,8 @@ BMSC <- function(formula, data_ctrl, data_pt,
 
         code.parameter <- paste(code.parameter,
                                paste0("    real<lower=0> sigma_u",ir,";      // random effects sd for grouping factor ",ir),
-                               paste0("    real[Ngrouping",ir,"] u",ir,";"),
+                               #paste0("    real[Ngrouping",ir,"] u",ir,";"),
+                               paste0("    real u",ir,"[Ngrouping",ir,"];"),
                                sep="\n"
         )
 

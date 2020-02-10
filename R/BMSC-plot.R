@@ -9,11 +9,74 @@
 #'         \item{hist}{histogram plot}
 #'         \item{mean}{the distribution of the mean statistic, over the simulated datasets, compared to the mean of the real data}
 #'     }
-#' @param limited logical. TRUE if the output should be limited within 4 standard deviations, FALSE it should not. default TRUE
+#' @param limited logical. TRUE if the output should be limited within 4 standard deviations, FALSE it should not. default FALSE
 #' @param ... other arguments for \code{bayesplot} methods.
+#'
+#' @examples
+#'
+#' # simulation of healthy controls data
+#'
+#' Sigma.ctrl <- matrix(cbind(1, .7,  .7, 1) ,nrow=2)
+#'
+#' U <- t(chol(Sigma.ctrl))
+#'
+#' numobs <- 100
+#'
+#' set.seed(123)
+#'
+#' random.normal <- matrix( rnorm( n = ncol(U) * numobs, mean = 3, sd = 1),
+#'                          nrow = ncol(U), ncol = numobs)
+#'
+#' X = U %*% random.normal
+#'
+#' dat.ctrl <- as.data.frame(t(X))
+#'
+#' names(dat.ctrl) <- c("y","x")
+#'
+#' cor(dat.ctrl)
+#'
+#' # simulation of patient data
+#'
+#' Sigma.pt <- matrix(cbind(1, 0,  0, 1) ,nrow=2)
+#'
+#' U <- t(chol(Sigma.pt))
+#'
+#' numobs <- 20
+#'
+#' set.seed(0)
+#'
+#' random.normal <- matrix( rnorm( n = ncol(U) * numobs, mean = 3, sd = 1),
+#'                  nrow = ncol(U), ncol = numobs)
+#'
+#' X = U %*% random.normal
+#'
+#' dat.pt <- as.data.frame(t(X))
+#'
+#' names(dat.pt) <- c("y","x")
+#'
+#' cor(dat.pt)
+#'
+#' # fit the single case model
+#'
+#' mdl.reg <- BMSC(y ~ x, data_ctrl = dat.ctrl, data_pt = dat.pt, seed = 10)
+#'
+#' # summarize the data
+#'
+#' summary(mdl.reg)
+#'
+#' # plot the posterior predictive checks
+#'
+#' pp_check(mdl.reg, limited = FALSE)
+#'
+#' pp_check(mdl.reg, limited = TRUE)
+#'
+#' pp_check(mdl.reg, type = "mean", limited = FALSE)
+#'
+#' pp_check(mdl.reg, type = "hist", limited = FALSE)
+#'
 #' @return a ggplot2 object
 #' @export
-pp_check.BMSC = function(object, type = "dens", limited = TRUE, ...) {
+pp_check.BMSC = function(object, type = "dens", limited = FALSE, ...) {
 
     if (class(object)[2] != "BMSC")
         stop("Not a valid BMSC object.")
@@ -81,6 +144,101 @@ pp_check.BMSC = function(object, type = "dens", limited = TRUE, ...) {
 #' }
 #' @param CI the dimension of the Credible Interval (or Equally Tailed Interval). Default 0.95.
 #' @param ... other arguments are ignored.
+#'
+#' @examples
+#'  \dontrun{
+#'
+#'  data(BSE)
+#'
+#'  # Normal robust regression of data coming from a body representation paradigm
+#'  # with a control sample of 12 participants and one patient with
+#'  # unilateral brachial plexus lesion
+#'  mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
+#'              (Body.District + Congruency + Side | ID),
+#'              data_ctrl = data.ctrl,
+#'              data_pt = data.pt,
+#'              cores = 4)
+#'
+#'  # generate a summary of the results
+#'  summary(mdl)
+#'
+#'  # posterior predictive p-value checking
+#'  pp_check(mdl, limited = FALSE)
+#'
+#'  # plot of the results
+#'  plot(mdl)
+#'  }
+#'
+#'
+#' # simulation of healthy controls data
+#'
+#' Sigma.ctrl <- matrix(cbind(1, .7,  .7, 1) ,nrow=2)
+#'
+#' U <- t(chol(Sigma.ctrl))
+#'
+#' numobs <- 100
+#'
+#' set.seed(123)
+#'
+#' random.normal <- matrix( rnorm( n = ncol(U) * numobs, mean = 3, sd = 1),
+#'                          nrow = ncol(U), ncol = numobs)
+#'
+#' X = U %*% random.normal
+#'
+#' dat.ctrl <- as.data.frame(t(X))
+#'
+#' names(dat.ctrl) <- c("y","x")
+#'
+#' cor(dat.ctrl)
+#'
+#' # simulation of patient data
+#'
+#' Sigma.pt <- matrix(cbind(1, 0,  0, 1) ,nrow=2)
+#'
+#' U <- t(chol(Sigma.pt))
+#'
+#' numobs <- 20
+#'
+#' set.seed(0)
+#'
+#' random.normal <- matrix( rnorm( n = ncol(U) * numobs, mean = 3, sd = 1),
+#'                  nrow = ncol(U), ncol = numobs)
+#'
+#' X = U %*% random.normal
+#'
+#' dat.pt <- as.data.frame(t(X))
+#'
+#' names(dat.pt) <- c("y","x")
+#'
+#' cor(dat.pt)
+#'
+#' # fit the single case model
+#'
+#' mdl.reg <- BMSC(y ~ x, data_ctrl = dat.ctrl, data_pt = dat.pt, seed = 10)
+#'
+#' # summarize the data
+#'
+#' summary(mdl.reg)
+#'
+#' # plot the results of both patient and control group
+#'
+#' plot(mdl.reg)
+#'
+#' # plot the results of the patient
+#'
+#' plot(mdl.reg, who = "patient")
+#'
+#' # plot the results of the difference between the control group and the patient
+#'
+#' plot(mdl.reg, who = "delta")
+#'
+#' # density plots
+#'
+#' plot(mdl.reg, type = "area")
+#'
+#' # histograms
+#'
+#' plot(mdl.reg, type = "hist")
 #'
 #' @return a plot, a ggplot2 object, or a bayesplot object
 #'
