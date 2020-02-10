@@ -10,7 +10,7 @@
 #'         \item{mean}{the distribution of the mean statistic, over the simulated datasets, compared to the mean of the real data}
 #'     }
 #' @param limited logical. TRUE if the output should be limited within 4 standard deviations, FALSE it should not. default TRUE
-#' @param ... other arguments are ignored.
+#' @param ... other arguments for \code{bayesplot} methods.
 #' @return a ggplot2 object
 #' @export
 pp_check.BMSC = function(object, type = "dens", limited = TRUE, ...) {
@@ -28,8 +28,8 @@ pp_check.BMSC = function(object, type = "dens", limited = TRUE, ...) {
 
     if ((requireNamespace("bayesplot", quietly = TRUE)) && (requireNamespace("gridExtra", quietly = TRUE))) {
         if (type == "hist") {
-            ct = bayesplot::ppc_hist(y_ct, y_ct_rep[[1]][1:8, ]) + ggtitle("Control Group")
-            pt = bayesplot::ppc_hist(y_pt, y_pt_rep[[1]][1:8, ]) + ggtitle("Patient")
+            ct = bayesplot::ppc_hist(y_ct, y_ct_rep[[1]][1:8, ], ...) + ggtitle("Control Group")
+            pt = bayesplot::ppc_hist(y_pt, y_pt_rep[[1]][1:8, ], ...) + ggtitle("Patient")
 
             if (limited) {
                 ct = ct + xlim(c(-sd(y_ct) * 4, sd(y_ct) * 4))
@@ -38,8 +38,8 @@ pp_check.BMSC = function(object, type = "dens", limited = TRUE, ...) {
 
             ans = gridExtra::grid.arrange(ct, pt)
         } else if (type == "mean") {
-            ct = bayesplot::ppc_stat(y_ct, y_ct_rep[[1]]) + ggtitle("Control Group")
-            pt = bayesplot::ppc_stat(y_pt, y_pt_rep[[1]]) + ggtitle("Patient")
+            ct = bayesplot::ppc_stat(y_ct, y_ct_rep[[1]], ...) + ggtitle("Control Group")
+            pt = bayesplot::ppc_stat(y_pt, y_pt_rep[[1]], ...) + ggtitle("Patient")
 
             if (limited) {
                 ct = ct + xlim(c(-sd(y_ct) * 4, sd(y_ct) * 4))
@@ -48,8 +48,8 @@ pp_check.BMSC = function(object, type = "dens", limited = TRUE, ...) {
 
             ans = gridExtra::grid.arrange(ct, pt)
         } else {
-            ct = bayesplot::ppc_dens_overlay(y_ct, y_ct_rep[[1]][1:200, ]) + ggtitle("Control Group")
-            pt = bayesplot::ppc_dens_overlay(y_pt, y_pt_rep[[1]][1:200, ]) + ggtitle("Patient")
+            ct = bayesplot::ppc_dens_overlay(y_ct, y_ct_rep[[1]][1:200, ], ...) + ggtitle("Control Group")
+            pt = bayesplot::ppc_dens_overlay(y_pt, y_pt_rep[[1]][1:200, ], ...) + ggtitle("Patient")
 
             if (limited) {
                 ct = ct + xlim(c(-sd(y_ct) * 4, sd(y_ct) * 4))

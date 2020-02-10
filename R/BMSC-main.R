@@ -94,6 +94,29 @@ NULL
 #' The normal distribution is the default.
 #' @param ... further arguments to be passed to \strong{stan} function.
 #'
+#' @examples
+#'  \dontrun{
+#'
+#'  data(BSE)
+#'
+#'  # Normal robust regression of data coming from a body representation paradigm
+#'  # with a control sample of 12 participants and one patient with
+#'  # unilateral brachial plexus lesion
+#'  mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side + (Body.District + Congruency + Side | ID),
+#'              data_ctrl = data.ctrl,
+#'              data_pt = data.pt,
+#'              cores = 4)
+#'
+#'  # generate a summary of the results
+#'  summary(mdl)
+#'
+#'  # posterior predictive p-value checking
+#'  pp_check(mdl, limited = FALSE)
+#'
+#'  # plot of the results
+#'  plot(mdl)
+#'  }
+#'
 #' @return a \code{BMSC} object
 #'
 #' @export
@@ -111,6 +134,9 @@ BMSC <- function(formula, data_ctrl, data_pt,
     return(out)
   }
 
+  if(missing(formula)) stop("the argument \"formula\" is not specified")
+  if(missing(data_ctrl)) stop("the dataframe \"data_ctrl\" is not specified")
+  if(missing(data_pt)) stop("the dataframe \"data_pt\" is not specified")
   if(typeprior!="normal"&&typeprior!="cauchy"&&typeprior!="student")
     stop("Not a valid typeprior")
 

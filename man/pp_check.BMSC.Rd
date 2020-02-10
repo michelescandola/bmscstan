@@ -17,7 +17,7 @@
 
 \item{limited}{logical. TRUE if the output should be limited within 4 standard deviations, FALSE it should not. default TRUE}
 
-\item{...}{other arguments are ignored.}
+\item{...}{other arguments for \code{bayesplot} methods.}
 }
 \value{
 a ggplot2 object

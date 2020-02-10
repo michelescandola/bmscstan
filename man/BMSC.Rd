@@ -56,3 +56,27 @@ a \code{BMSC} object
 \description{
 \code{BMSC} fits the Bayesian Multilevel Single Case models.
 }
+\examples{
+ \dontrun{
+
+ data(BSE)
+
+ # Normal robust regression of data coming from a body representation paradigm
+ # with a control sample of 12 participants and one patient with
+ # unilateral brachial plexus lesion
+ mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side + (Body.District + Congruency + Side | ID),
+             data_ctrl = data.ctrl,
+             data_pt = data.pt,
+             cores = 4)
+
+ # generate a summary of the results
+ summary(mdl)
+
+ # posterior predictive p-value checking
+ pp_check(mdl, limited = FALSE)
+
+ # plot of the results
+ plot(mdl)
+ }
+
+}
