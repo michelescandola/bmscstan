@@ -1,6 +1,6 @@
-Package: BMSC
+Package: bmscstan
 Type: Package
-Title: BMSC: Bayesian Multilevel Single Case models using 'Stan'
+Title: bmscstan: Bayesian Multilevel Single Case models using 'Stan'
 Version: 0.1.0
 Author: Michele Scandola
 Maintainer: Michele Scandola <michele.scandola@univr.it>

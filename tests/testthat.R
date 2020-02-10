@@ -1,4 +1,4 @@
 library(testthat)
-library(BMSC)
+library(bmscstan)
 
-test_check("BMSC")
+test_check("bmscstan")

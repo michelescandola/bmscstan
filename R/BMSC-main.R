@@ -1,13 +1,13 @@
-#' BMSC: Bayesian Multilevel Single Case models using 'Stan'
+#' bmscstan: Bayesian Multilevel Single Case models using 'Stan'
 #'
-#' The \strong{BMSC} package provides an interface to fit Bayesian Multilevel Single Case models.
+#' The \strong{bmscstan} package provides an interface to fit Bayesian Multilevel Single Case models.
 #' These models compare the performance of a single patient against a control group, combining
 #' the flexibility of multilevel models and the potentiality of Bayesian Statistics.
 #'
 #' The package is now limited to gaussian data only, but we will further expand it to cover
 #' binomial and ordinal (Likert scales) data.
 #'
-#' By means of BMSC the effects of the control group and the effects of the deviance between the
+#' By means of \strong{bmscstan} the effects of the control group and the effects of the deviance between the
 #' patient and the group will be esimated.
 #'
 #' The model to estimate the controls parameters is:
@@ -32,7 +32,7 @@
 #' @import rstan logspline bayesplot LaplacesDemon stats ggplot2
 #'
 #' @docType package
-#' @name BMSC-package
+#' @name bmscstan
 NULL
 
 #' Data from a patient with brachial plexious lesion
