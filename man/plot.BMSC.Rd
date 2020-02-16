@@ -56,8 +56,6 @@ Plot estimates from a \code{BMSC} object.
 
  # plot of the results
  plot(mdl)
- }
-
 
 # simulation of healthy controls data
 
@@ -128,5 +126,6 @@ plot(mdl.reg, type = "area")
 # histograms
 
 plot(mdl.reg, type = "hist")
+}
 
 }

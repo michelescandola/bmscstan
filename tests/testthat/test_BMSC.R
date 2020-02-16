@@ -2,7 +2,7 @@
 # cannot actually run brms models in tests as it takes way too long
 context("Tests for bmscstan error messages")
 
-test_that("bmscstan produces expected errors", {
+test_that("bmsc_stan produces expected errors", {
   dat.ctrl <- data.frame(y = rnorm(100), x = rnorm(100), id = rep(1:5, 20), cond = rep(c(1,2), each = 50))
   dat.pt   <- data.frame(y = rnorm(20), x = rnorm(20), cond = rep(1:2, 20))
 

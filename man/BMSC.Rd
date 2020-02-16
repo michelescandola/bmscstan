@@ -78,7 +78,6 @@ mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
 
  # plot of the results
  plot(mdl)
- }
 
 # simulation of healthy controls data
 
@@ -129,5 +128,6 @@ mdl.reg <- BMSC(y ~ x, data_ctrl = dat.ctrl, data_pt = dat.pt, seed = 10)
 # summarize the data
 
 summary(mdl.reg)
+}
 
 }

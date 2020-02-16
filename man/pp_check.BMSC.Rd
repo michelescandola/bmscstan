@@ -26,7 +26,7 @@ a ggplot2 object
 \code{pp_check()} plots the posterior predictive check for BMSC objects.
 }
 \examples{
-
+ \dontrun{
 # simulation of healthy controls data
 
 Sigma.ctrl <- matrix(cbind(1, .7,  .7, 1) ,nrow=2)
@@ -86,5 +86,6 @@ pp_check(mdl.reg, limited = TRUE)
 pp_check(mdl.reg, type = "mean", limited = FALSE)
 
 pp_check(mdl.reg, type = "hist", limited = FALSE)
+}
 
 }

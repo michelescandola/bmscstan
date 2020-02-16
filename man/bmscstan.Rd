@@ -3,7 +3,7 @@
 \docType{package}
 \name{bmscstan}
 \alias{bmscstan}
-\title{bmscstan: Bayesian Multilevel Single Case models using 'Stan'}
+\title{Bayesian Multilevel Single Case models using 'Stan'}
 \description{
 The \strong{bmscstan} package provides an interface to fit Bayesian Multilevel Single Case models.
 These models compare the performance of a single patient against a control group, combining
@@ -33,7 +33,7 @@ where \eqn{\phi = \beta + \delta}.
 }
 \section{Details}{
 
-The main function of \strong{BMSC} is \code{\link{BMSC}}, which uses formula syntax to
+The main function of \strong{bmscstan} is \code{\link{BMSC}}, which uses formula syntax to
 specify your model.
 }
 

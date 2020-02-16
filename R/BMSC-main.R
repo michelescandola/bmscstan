@@ -26,7 +26,7 @@
 #' where \eqn{\phi = \beta + \delta}.
 #'
 #' @section Details:
-#' The main function of \strong{BMSC} is \code{\link{BMSC}}, which uses formula syntax to
+#' The main function of \strong{bmscstan} is \code{\link{BMSC}}, which uses formula syntax to
 #' specify your model.
 #'
 #' @import rstan logspline bayesplot LaplacesDemon stats ggplot2
