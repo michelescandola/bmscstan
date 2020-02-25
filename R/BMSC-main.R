@@ -268,8 +268,8 @@ BMSC <- function(formula, data_ctrl, data_pt,
       target += normal_lpdf(b_Ctrl  | 0, 10);
       target += normal_lpdf(b_Delta | 0, 10);
 
-      target += cauchy_lpdf(y_Pts|mu_Pts,sigmaP);
-      target += cauchy_lpdf(y_Ctrl|mu_Ctrl,sigmaC);
+      target += normal_lpdf(y_Pts|mu_Pts,sigmaP);
+      target += normal_lpdf(y_Ctrl|mu_Ctrl,sigmaC);
     }"
   }else if(typeprior=="cauchy"){
     code.model <-   "
@@ -280,8 +280,8 @@ BMSC <- function(formula, data_ctrl, data_pt,
       target += cauchy_lpdf(b_Ctrl  | 0, sqrt(2)/2);
       target += cauchy_lpdf(b_Delta | 0, sqrt(2)/2);
 
-      target += cauchy_lpdf(y_Pts|mu_Pts,sigmaP);
-      target += cauchy_lpdf(y_Ctrl|mu_Ctrl,sigmaC);
+      target += normal_lpdf(y_Pts|mu_Pts,sigmaP);
+      target += normal_lpdf(y_Ctrl|mu_Ctrl,sigmaC);
     }"
   }else if(typeprior=="student"){
     code.model <-   "
@@ -292,8 +292,8 @@ BMSC <- function(formula, data_ctrl, data_pt,
       target += student_t_lpdf(b_Ctrl  | 3, 0, 10);
       target += student_t_lpdf(b_Delta | 3, 0, 10);
 
-      target += cauchy_lpdf(y_Pts|mu_Pts,sigmaP);
-      target += cauchy_lpdf(y_Ctrl|mu_Ctrl,sigmaC);
+      target += normal_lpdf(y_Pts|mu_Pts,sigmaP);
+      target += normal_lpdf(y_Ctrl|mu_Ctrl,sigmaC);
     }"
   }
 
@@ -302,10 +302,10 @@ BMSC <- function(formula, data_ctrl, data_pt,
     real y_ct_rep[Obs_Controls];
 
     for(i in 1:Obs_Patients){
-      y_pt_rep[i] = cauchy_rng(mu_Pts[i], sigmaP);
+      y_pt_rep[i] = normal_rng(mu_Pts[i], sigmaP);
     }
     for(i in 1:Obs_Controls){
-      y_ct_rep[i] = cauchy_rng(mu_Ctrl[i], sigmaC);
+      y_ct_rep[i] = normal_rng(mu_Ctrl[i], sigmaC);
     }
   }"
 
@@ -350,7 +350,6 @@ BMSC <- function(formula, data_ctrl, data_pt,
 
         code.parameter <- paste(code.parameter,
                                paste0("    real<lower=0> sigma_u",ir,";      // random effects sd for grouping factor ",ir),
-                               #paste0("    real[Ngrouping",ir,"] u",ir,";"),
                                paste0("    real u",ir,"[Ngrouping",ir,"];"),
                                sep="\n"
         )
