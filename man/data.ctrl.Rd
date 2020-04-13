@@ -4,7 +4,8 @@
 \name{data.ctrl}
 \alias{data.ctrl}
 \title{Data from a control group of 16 participants}
-\format{A data frame with 4049 rows and 5 variables
+\format{
+A data frame with 4049 rows and 5 variables
 \describe{
  \item{RT}{Reaction times, in milliseconds}
  \item{Body.District}{Body district, categorial factor of
@@ -12,7 +13,8 @@
  \item{Congruency}{The trail was Congruent or Incongruent?}
  \item{Side}{The trial showed a left or right limb}
  \item{ID}{The participant ID}
-}}
+}
+}
 \usage{
 data.ctrl
 }

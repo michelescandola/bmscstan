@@ -1,0 +1,220 @@
+#' Pairwise contrasts
+#'
+#' Calculate pairwise comparisons between group levels
+#'
+#'
+#' @param mdl An object of class \code{BMSC}.
+#' @param contrast Character value giving the name of the coefficient whose levels need to be compared.
+#' @param covariate Character value giving the name of a variable with respect to which a difference
+#' quotient of the linear predictors is computed. In order for this to be useful,
+#' \code{covariate} should be a numeric predictor that interacts with at least one factor in \code{contrast}.
+#' @param who parameter to choose the estimates to contrast
+#' \describe{
+#'         \item{control}{only the controls}
+#'         \item{patient}{only the patient \eqn{(\beta + \delta)}}
+#'         \item{delta}{only the difference between the patient and controls}
+#' }
+#'
+#' @examples
+#'  \dontrun{
+#'
+#'  data(BSE)
+#'
+#' # Normal robust regression of data coming from a body representation paradigm
+#' # with a control sample of 12 participants and one patient with
+#' # unilateral brachial plexus lesion
+#' mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
+#'             (Body.District + Congruency + Side | ID),
+#'             data_ctrl = data.ctrl,
+#'             data_pt = data.pt,
+#'             cores = 4)
+#'
+#'  # generate a summary of the results
+#'  summary(mdl)
+#'
+#'  # posterior predictive p-value checking
+#'  pp_check(mdl, limited = FALSE)
+#'
+#'  # plot of the results
+#'  plot(mdl)
+#'
+#'  pairwise(mdl , contrast = "Body.District1:Side1")
+#' }
+#'
+#' @return a \code{pairwise.BMSC} object
+#'
+#' @export
+pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
+  # function to find all the column of the posterior distribution involved in the contrast
+  check_contrasts <- function( contr.names , contr.parts , contrast ){
+    M <- strsplit(contr.names , ":")
+    out <- NULL
+    len <- NULL
+    i <- 1
+
+    for(m in M){
+      len <- c(len , length(m))
+      for(cp in contr.parts){
+        for(mm in m){
+          if(grepl(cp,mm)) out <- c(out , i)
+        }
+      }
+      i <- i +1
+    }
+
+    return(as.numeric(names(which(len[out] == table(out)))))
+  }
+
+  se <- function(object) {
+    sd(object)/sqrt(length(object))
+  }
+
+  if (mdl[[7]] == "normal") {
+    d0 <- dnorm(0, 0, 10)
+  } else if (mdl[[7]] == "cauchy") {
+    d0 <- dcauchy(0, 0, sqrt(2)/2)
+  } else if (mdl[[7]] == "student") {
+    d0 <- LaplacesDemon::dst(0, 10, 3)
+  }
+
+
+  if (class(mdl)[2] != "BMSC")
+    stop("Not a valid BMSC object.")
+
+  if (!exists("contrast"))
+    stop("Not a valid contrast")
+
+  # variable declaration
+  tmp.post <- tmp.data <- contr.names <- contr.column <- contr.parts <- contr.table <-
+    tmp.marginal <- findRow <- sum_logspl <- bf_sd <- tmp.y <- NULL
+
+  # extracting data from BMSC model
+  if(who == "delta"){
+    tmp.post <- rstan::extract(mdl[[2]], pars = "b_Delta")
+    tmp.data <- mdl[[3]]
+    contr.names <- colnames(mdl[[5]]$XF_Pts)
+    contr.table <- mdl[[5]]$XF_Pts
+  } else if(who == "control"){
+    tmp.post <- rstan::extract(mdl[[2]], pars = "b_Ctrl")
+    tmp.data <- mdl[[4]]
+    contr.names <- colnames(mdl[[5]]$XF_Ctrl)
+    contr.table <- mdl[[5]]$XF_Ctrl
+  } else if(who == "patient"){
+    delta <- rstan::extract(mdl[[2]], pars = "b_Delta")
+    ctrl  <- rstan::extract(mdl[[2]], pars = "b_Ctrl")
+    tmp.post <- list(delta[[1]] + ctrl[[1]])
+    tmp.data <- mdl[[3]]
+    contr.names <- colnames(mdl[[5]]$XF_Pts)
+    contr.table <- mdl[[5]]$XF_Pts
+  } else stop("Not a valid \"who\" value")
+
+  if(sum(grepl(contrast,contr.names))==0) stop("Not a valid contrast")
+
+  # find the columns of the posterior distribution
+  contr.parts <- unlist(strsplit(contrast,":"))
+
+  contr.column <- which(grepl(contrast,contr.names))
+
+  contr.column <- c(contr.column, check_contrasts(contr.names[1:(contr.column-1)] , contr.parts , contrast))
+
+  contr.column <- c(contr.column, which(grepl("(Intercept)",contr.names)))
+
+  contr.column <- contr.column[order(contr.column)]
+
+  # find a name to each marginal distribution
+
+  create.names <- matrix(nrow = nrow(tmp.data) , ncol = length(contr.parts))
+  ricontrasts  <- matrix(nrow = nrow(tmp.data) , ncol = length(contr.parts))
+
+  for( i in 1:length(contr.parts) ){
+    cp <- contr.parts[i]
+    create.names[ , i] <- as.character(tmp.data[,grepl(substr(cp , start = 1 , stop = (nchar(cp)-1) ), colnames(tmp.data) )])
+    ricontrasts[ , i]  <- contr.table[,contr.column][,cp == colnames(contr.table[,contr.column])]
+  }
+
+  create.names <- as.data.frame( cbind( apply(create.names, 1, paste, collapse = " ") , ricontrasts ) )
+
+  create.names <- unique(create.names)
+
+  # compute the marginal distributions
+
+  marginal_distribution <- list()
+
+  tmp.table <- unique(contr.table[,contr.column])
+
+  for(i in 1:nrow(create.names)){
+    findRow <- NULL
+    for(j in 1:nrow(tmp.table)){
+      if(sum(tmp.table[j,colnames(tmp.table)%in%contr.parts] == create.names[i,2:(length(contr.parts)+1)])==length(contr.parts)) findRow <- j
+    }
+    marginal_distribution[[create.names[i,1]]] <- data.frame( y = colSums(t(tmp.post[[1]][,contr.column])*tmp.table[findRow,]),
+                                            name = create.names[i,1])
+  }
+
+
+  # create a summary for each marginal distribution
+
+  sum.unique <- list()
+
+  for(marginal_name in marginal_distribution){
+    sum_logspl <- logspline(marginal_name$y)
+    bf_sd <- d0/dlogspline(0, sum_logspl)
+
+    sum.unique[[marginal_name$name[1]]] <- as.data.frame(cbind(mean(marginal_name$y),
+                                                               se(marginal_name$y),
+                                                               sd(marginal_name$y),
+                                                               quantile(marginal_name$y, probs = 2.5/100),
+                                                               quantile(marginal_name$y, probs = 25/100),
+                                                               quantile(marginal_name$y, probs = 50/100),
+                                                               quantile(marginal_name$y, probs = 75/100),
+                                                               quantile(marginal_name$y, probs = 97.5/100),
+                                                               bf_sd))
+
+    colnames(sum.unique[[marginal_name$name[1]]]) <- c("mean", "se_mean", "sd", "2.5%", "25%", "50%", "75%", "97.5%","BF10 (not zero)")
+  }
+
+  sum.unique <- do.call("rbind" , sum.unique)
+
+  row.names(sum.unique) <- create.names[,1]
+
+  # create a summary for each comparison
+
+  sum.contrast <- list()
+  sum.names    <- list()
+
+  for(i in 1:(length(marginal_distribution)-1)){
+    for(j in (i+1):length(marginal_distribution)){
+      tmp.y <- marginal_distribution[[i]]$y - marginal_distribution[[j]]$y
+
+      sum_logspl <- logspline(tmp.y)
+      bf_sd <- d0/dlogspline(0, sum_logspl)
+
+      sum.contrast[[paste(i,j)]] <- as.data.frame(cbind(mean(tmp.y),
+                                                                 se(tmp.y),
+                                                                 sd(tmp.y),
+                                                                 quantile(tmp.y, probs = 2.5/100),
+                                                                 quantile(tmp.y, probs = 25/100),
+                                                                 quantile(tmp.y, probs = 50/100),
+                                                                 quantile(tmp.y, probs = 75/100),
+                                                                 quantile(tmp.y, probs = 97.5/100),
+                                                                 bf_sd))
+
+      colnames(sum.contrast[[paste(i,j)]]) <- c("mean", "se_mean", "sd", "2.5%", "25%", "50%", "75%", "97.5%","BF10")
+
+      sum.names[[paste(i,j)]] <- paste(marginal_distribution[[i]]$name[1],
+                                                 marginal_distribution[[j]]$name[1],
+                                                 sep = " - ")
+    }
+  }
+
+  sum.contrast <- do.call("rbind" , sum.contrast)
+
+  row.names(sum.contrast) <- do.call("c" , sum.names)
+
+  out <- list(sum.unique,sum.contrast)
+
+  class(out) <- append(class(out),"pairwise.BMSC")
+
+  return(out)
+
+}
