@@ -26,14 +26,14 @@ quotient of the linear predictors is computed. In order for this to be useful,
 a \code{pairwise.BMSC} object
 }
 \description{
-Calculate pairwise comparisons between group levels
+Calculate pairwise comparisons between marginal posterior distributions divided by group levels
 }
 \examples{
  \dontrun{
 
  data(BSE)
 
-# Normal robust regression of data coming from a body representation paradigm
+# Normal regression of data coming from a body representation paradigm
 # with a control sample of 12 participants and one patient with
 # unilateral brachial plexus lesion
 mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
@@ -51,6 +51,7 @@ mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
  # plot of the results
  plot(mdl)
 
+ # compute pairwise contrasts
  pairwise(mdl , contrast = "Body.District1:Side1")
 }
 

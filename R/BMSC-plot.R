@@ -424,3 +424,142 @@ plot.BMSC = function(x, who = "both", type = "interval", CI = 0.95, ...) {
 
     return(ans)
 }
+
+#' Plot estimates from a \code{pairwise.BMSC} object.
+#'
+#' @param x An object of class \link{pairwise.BMSC}.
+#' @param type a parameter to select the typology of graph
+#' \describe{
+#'         \item{interval}{the estimates will be represented by means of pointrange, with median and the boundaries of the credible interval}
+#'         \item{area}{a density plot}
+#'         \item{hist}{a density histogram}
+#' }
+#' @param CI the dimension of the Credible Interval (or Equally Tailed Interval). Default 0.95.
+#' @param ... other arguments are ignored.
+#'
+#' @examples
+#'  \dontrun{
+#'
+#'  data(BSE)
+#'
+#'  # Normal regression of data coming from a body representation paradigm
+#'  # with a control sample of 12 participants and one patient with
+#'  # unilateral brachial plexus lesion
+#'  mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
+#'              (Body.District + Congruency + Side | ID),
+#'              data_ctrl = data.ctrl,
+#'              data_pt = data.pt,
+#'              cores = 4)
+#'
+#'  # generate a summary of the results
+#'  summary(mdl)
+#'
+#'  # posterior predictive p-value checking
+#'  pp_check(mdl, limited = FALSE)
+#'
+#'  # plot of the results
+#'  plot(mdl)
+#'
+#'  # compute pairwise contrasts
+#'  ph <- pairwise(mdl , contrast = "Body.District1:Side1")
+#'
+#'  ph
+#'
+#'  # plot pairwise comparisons
+#'
+#'  plot(ph)
+#'
+#'  plot(ph , type = "area")
+#'
+#'  # customization of pairiwse comparisons plot
+#'
+#'  plot(ph)[[1]]+theme_bw(base_size = 18)
+#'
+#'  plot(ph , type = "area")[[1]]+theme_bw(base_size = 18)+
+#'    theme(strip.text.y = element_text( angle = 0))
+#' }
+#'
+#' @return a list of two ggplot2 objects
+#'
+#' @method plot pairwise.BMSC
+#' @export
+plot.pairwise.BMSC = function(x, type = "interval", CI = 0.95, ...) {
+  if (class(x)[2] != "pairwise.BMSC")
+    stop("Not a valid pairwise.BMSC object.")
+
+  limits <- c((1 - CI)/2, 1 - ((1 - CI)/2))
+
+  low <- i <- high <- med <- group <- value <- y <- NULL
+
+  # compute the posterior distributions of the contrasts
+
+  deltas.dist     <- list()
+  deltas.names    <- list()
+
+  for(i in 1:(length(x[[5]])-1)){
+    for(j in (i+1):length(x[[5]])){
+      deltas.dist[[paste(i,j)]] <- x[[5]][[i]]$y - x[[5]][[j]]$y
+
+      deltas.names[[paste(i,j)]] <- paste(x[[5]][[i]]$name[1],
+                                       x[[5]][[j]]$name[1],
+                                       sep = " - ")
+    }
+  }
+
+  deltas.names <- do.call("c" , deltas.names)
+
+  if (type == "interval") {
+    betas  <- do.call("rbind" , lapply(x[[5]], function(x){ quantile(x$y , probs = c(limits[1], 0.5, limits[2]))}))
+    deltas <- do.call("rbind" , lapply(deltas.dist, function(x){ quantile(x , probs = c(limits[1], 0.5, limits[2]))}))
+
+    namC <- sapply(x[[5]], function(x){ as.character( x$name[1] ) } )
+
+    dat1 <- data.frame(low = betas[ , 1 ], med = betas[ , 2 ], high = betas[ , 3 ],
+                       i = ordered(namC, level = namC[length(namC):1]))
+    dat2 <- data.frame(low = deltas[ , 1 ], med = deltas[ , 2 ], high = deltas[ , 3 ],
+                       i = ordered(deltas.names, level = deltas.names[length(deltas.names):1]))
+
+    ans <- list(
+      ggplot2::ggplot(dat1, aes(x = i, ymin = low, ymax = high, y = med)) +
+        geom_pointrange() + coord_flip() + xlab("coefficients") + ylab(""),
+      ggplot2::ggplot(dat2, aes(x = i, ymin = low, ymax = high, y = med)) +
+        geom_pointrange() + coord_flip() + xlab("coefficients") + ylab("")
+    )
+  } else if (type == "area") {
+        betas  <- do.call("rbind", x[[5]])
+        deltas <- data.frame(
+          y = do.call("c", deltas.dist),
+          contrast = rep(deltas.names , each = length(deltas.dist[[1]]))
+          )
+
+        betas$name <- ordered(betas$name, level = levels(betas$name)[length(levels(betas$name)):1])
+        deltas$name <- ordered(deltas$contrast, level = levels(deltas$contrast)[length(levels(deltas$contrast)):1])
+
+        dat1 <- betas
+        dat2 <- deltas
+
+        ans <- list(
+          ggplot2::ggplot(dat1, aes(x = y)) + geom_density() + facet_grid(name ~ .) + xlab("coefficients") + ylab(""),
+          ggplot2::ggplot(dat2, aes(x = y)) + geom_density() + facet_grid(contrast ~ .) + xlab("contrast") + ylab("")
+        )
+  } else if (type == "hist") {
+    betas  <- do.call("rbind", x[[5]])
+    deltas <- data.frame(
+      y = do.call("c", deltas.dist),
+      contrast = rep(deltas.names , each = length(deltas.dist[[1]]))
+    )
+
+    betas$name <- ordered(betas$name, level = levels(betas$name)[length(levels(betas$name)):1])
+    deltas$name <- ordered(deltas$contrast, level = levels(deltas$contrast)[length(levels(deltas$contrast)):1])
+
+    dat1 <- betas
+    dat2 <- deltas
+
+    ans <- list(
+      ggplot2::ggplot(dat1, aes(x = y)) + geom_histogram() + facet_grid(name ~ .) + xlab("coefficients") + ylab(""),
+      ggplot2::ggplot(dat2, aes(x = y)) + geom_histogram() + facet_grid(contrast ~ .) + xlab("contrast") + ylab("")
+    )
+  }
+
+  return(ans)
+}

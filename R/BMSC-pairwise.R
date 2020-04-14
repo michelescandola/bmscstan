@@ -1,6 +1,6 @@
 #' Pairwise contrasts
 #'
-#' Calculate pairwise comparisons between group levels
+#' Calculate pairwise comparisons between marginal posterior distributions divided by group levels
 #'
 #'
 #' @param mdl An object of class \code{BMSC}.
@@ -20,7 +20,7 @@
 #'
 #'  data(BSE)
 #'
-#' # Normal robust regression of data coming from a body representation paradigm
+#' # Normal regression of data coming from a body representation paradigm
 #' # with a control sample of 12 participants and one patient with
 #' # unilateral brachial plexus lesion
 #' mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
@@ -38,6 +38,7 @@
 #'  # plot of the results
 #'  plot(mdl)
 #'
+#'  # compute pairwise contrasts
 #'  pairwise(mdl , contrast = "Body.District1:Side1")
 #' }
 #'
@@ -211,10 +212,36 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
 
   row.names(sum.contrast) <- do.call("c" , sum.names)
 
-  out <- list(sum.unique,sum.contrast)
+  out <- list(sum.unique , sum.contrast , contrast , covariate , marginal_distribution , mdl[[7]])
 
   class(out) <- append(class(out),"pairwise.BMSC")
 
   return(out)
 
+}
+
+#' Print summaries of Pairwise Bayesian Multilevel Single Case objects
+#'
+#'
+#' @param x An object of class \code{pairwise.BMSC}, resulting from the \link{pairwise.BMSC} function.
+#'
+#' @param ... further arguments passed to or from other methods.
+#'
+#' @method print pairwise.BMSC
+#' @export
+print.pairwise.BMSC = function(x, ...) {
+
+  if(is.null(x[[4]])){
+    cat("\nPairwise Bayesian Multilevel Single Case contrasts of coefficients divided by", x[[3]] , "\n\n")
+  } else {
+    cat("\nPairwise Bayesian Multilevel Single Case contrasts of", x[[4]] ,"covariate divided by", x[[3]] , "\n\n")
+  }
+
+  cat("\n\n  Marginal distributions\n\n")
+
+  print(x[[1]], ...)
+  cat("\n")
+  cat("\n\n  Table of contrasts\n\n")
+
+  print(x[[2]], ...)
 }
