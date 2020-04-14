@@ -5,6 +5,7 @@
 #' @param object a BMSC object
 #' @param type
 #' \describe{
+#'         \item{text}{the numeric posterior predicitve p-value (should be around 0.5)}
 #'         \item{dens}{density overlay plot}
 #'         \item{hist}{histogram plot}
 #'         \item{mean}{the distribution of the mean statistic, over the simulated datasets, compared to the mean of the real data}
@@ -77,7 +78,7 @@
 #'
 #' @return a ggplot2 object
 #' @export
-pp_check.BMSC = function(object, type = "dens", limited = FALSE, ...) {
+pp_check.BMSC = function(object, type = "text", limited = FALSE, ...) {
 
     if (class(object)[2] != "BMSC")
         stop("Not a valid BMSC object.")
@@ -90,14 +91,21 @@ pp_check.BMSC = function(object, type = "dens", limited = FALSE, ...) {
 
     ans = list()
 
+    if( type == "text" ) {
+      ans = list(
+        "Control group PPP" = mean( apply(y_ct_rep[[1]] , 2 , mean) > mean( y_ct ) ),
+        "Patient PPP"       = mean( apply(y_pt_rep[[1]] , 2 , mean) > mean( y_pt ) )
+      )
+    }
+
     if ((requireNamespace("bayesplot", quietly = TRUE)) && (requireNamespace("gridExtra", quietly = TRUE))) {
         if (type == "hist") {
             ct = bayesplot::ppc_hist(y_ct, y_ct_rep[[1]][1:8, ], ...) + ggtitle("Control Group")
             pt = bayesplot::ppc_hist(y_pt, y_pt_rep[[1]][1:8, ], ...) + ggtitle("Patient")
 
             if (limited) {
-                ct = ct + xlim(c(-sd(y_ct) * 4, sd(y_ct) * 4))
-                pt = pt + xlim(c(-sd(y_pt) * 4, sd(y_pt) * 4))
+                ct = ct + coord_cartesian(xlim = quantile(y_ct , probs = c(0.001 , 0.999)) - c(IQR(y_ct) , -IQR(y_ct) ) )
+                pt = pt + coord_cartesian(xlim = quantile(y_pt , probs = c(0.001 , 0.999)) - c(IQR(y_pt) , -IQR(y_pt) ) )
             }
 
             ans = gridExtra::grid.arrange(ct, pt)
@@ -106,8 +114,8 @@ pp_check.BMSC = function(object, type = "dens", limited = FALSE, ...) {
             pt = bayesplot::ppc_stat(y_pt, y_pt_rep[[1]], ...) + ggtitle("Patient")
 
             if (limited) {
-                ct = ct + xlim(c(-sd(y_ct) * 4, sd(y_ct) * 4))
-                pt = pt + xlim(c(-sd(y_pt) * 4, sd(y_pt) * 4))
+                ct = ct + coord_cartesian(xlim = quantile(y_ct , probs = c(0.001 , 0.999)) - c(IQR(y_ct) , -IQR(y_ct) ) )
+                pt = pt + coord_cartesian(xlim = quantile(y_pt , probs = c(0.001 , 0.999)) - c(IQR(y_pt) , -IQR(y_pt) ) )
             }
 
             ans = gridExtra::grid.arrange(ct, pt)
@@ -116,8 +124,8 @@ pp_check.BMSC = function(object, type = "dens", limited = FALSE, ...) {
             pt = bayesplot::ppc_dens_overlay(y_pt, y_pt_rep[[1]][1:200, ], ...) + ggtitle("Patient")
 
             if (limited) {
-                ct = ct + xlim(c(-sd(y_ct) * 4, sd(y_ct) * 4))
-                pt = pt + xlim(c(-sd(y_pt) * 4, sd(y_pt) * 4))
+                ct = ct + coord_cartesian(xlim = quantile(y_ct , probs = c(0.001 , 0.999)) - c(IQR(y_ct) , -IQR(y_ct) ) )
+                pt = pt + coord_cartesian(xlim = quantile(y_pt , probs = c(0.001 , 0.999)) - c(IQR(y_pt) , -IQR(y_pt) ) )
             }
 
             ans = gridExtra::grid.arrange(ct, pt)
