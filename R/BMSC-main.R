@@ -422,21 +422,3 @@ BMSC <- function(formula, data_ctrl, data_pt,
   return(data.list)
 }
 
-
-#' Computes log marginal likelihood via bridge sampling.
-#'
-#' @param object a BMSC object
-#' @param ... further arguments passed to or from other methods.
-#' @return an "psis_loo" "loo" object
-#' @export
-
-bridge_sampler.BMSC <- function(object, ...){
-
-  if (requireNamespace("bridgesampling", quietly = TRUE)) {
-    ans <- bridgesampling::bridge_sampler(object[[2]],...)
-  }
-
-  return(ans)
-
-}
-
