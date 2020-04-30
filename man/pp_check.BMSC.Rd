@@ -2,23 +2,23 @@
 % Please edit documentation in R/BMSC-plot.R
 \name{pp_check.BMSC}
 \alias{pp_check.BMSC}
-\title{Posterior predictive checks for BMSC objects}
+\title{Posterior predictive check for BMSC objects}
 \usage{
-\method{pp_check}{BMSC}(object, type = "text", limited = FALSE, ...)
+\method{pp_check}{BMSC}(object, type = "dens", limited = FALSE, ...)
 }
 \arguments{
-\item{object}{a BMSC object}
+\item{object}{a \link{BMSC} object}
 
-\item{type}{\describe{
-    \item{text}{the numeric posterior predicitve p-value (should be around 0.5)}
-    \item{dens}{density overlay plot}
-    \item{hist}{histogram plot}
-    \item{mean}{the distribution of the mean statistic, over the simulated datasets, compared to the mean of the real data}
+\item{type}{a parameter to select the typology of graph
+\describe{
+        \item{dens}{density overlay plot}
+        \item{hist}{histogram plot}
+        \item{mode}{the distribution of the mode statistic, over the simulated datasets, compared to the mode of the real data}
 }}
 
-\item{limited}{logical. TRUE if the output should be limited within 4 standard deviations, FALSE it should not. default FALSE}
+\item{limited}{logical. TRUE if the output should be limited within the 95\% credible interval, FALSE it should not. Default FALSE.}
 
-\item{...}{other arguments for \code{bayesplot} methods.}
+\item{...}{other arguments are ignored.}
 }
 \value{
 a ggplot2 object
@@ -62,7 +62,7 @@ set.seed(0)
 random.normal <- matrix( rnorm( n = ncol(U) * numobs, mean = 3, sd = 1),
                  nrow = ncol(U), ncol = numobs)
 
-X = U \%*\% random.normal
+X = U \\%*\\% random.normal
 
 dat.pt <- as.data.frame(t(X))
 
@@ -84,7 +84,7 @@ pp_check(mdl.reg, limited = FALSE)
 
 pp_check(mdl.reg, limited = TRUE)
 
-pp_check(mdl.reg, type = "mean", limited = FALSE)
+pp_check(mdl.reg, type = "mode", limited = FALSE)
 
 pp_check(mdl.reg, type = "hist", limited = FALSE)
 }

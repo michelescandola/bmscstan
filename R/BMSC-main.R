@@ -1,14 +1,14 @@
 #' Bayesian Multilevel Single Case models using 'Stan'
 #'
 #' The \strong{bmscstan} package provides an interface to fit Bayesian Multilevel Single Case models.
-#' These models compare the performance of a single patient against a control group, combining
+#' These models compare the performance of a Single Case against a control group, combining
 #' the flexibility of multilevel models and the potentiality of Bayesian Statistics.
 #'
 #' The package is now limited to gaussian data only, but we will further expand it to cover
 #' binomial and ordinal (Likert scales) data.
 #'
 #' By means of \strong{bmscstan} the effects of the control group and the effects of the deviance between the
-#' patient and the group will be esimated.
+#' Single Case and the group will be esimated.
 #'
 #' The model to estimate the controls parameters is:
 #'
@@ -19,7 +19,7 @@
 #' Varying (or Random, or Group-level) effects, and \eqn{b} are the unknown estimates for the varying effects.
 #' \eqn{\sigma^2} is the variance.
 #'
-#' In order to estimate the coefficients of the patient, the formula is the following:
+#' In order to estimate the coefficients of the Single Case, the formula is the following:
 #'
 #' \deqn{y_{pt}~\mathcal{N}(\phi X_{pt}, \sigma_{pt}^2)}
 #'
@@ -35,10 +35,10 @@
 #' @name bmscstan
 NULL
 
-#' Data from a patient with brachial plexious lesion
+#' Data from a Single Case with brachial plexious lesion
 #'
-#' A dataset containing the results from the Body Sidednedd Task
-#' from a single patient
+#' A dataset containing the results from the Body Sidedness Task
+#' from a single Single Case
 #'
 #' @format A data frame with 467 rows and 4 variables
 #' \describe{
@@ -74,8 +74,8 @@ NULL
 #' @param formula An object of class \code{formula}: a symbolic description of the model to be fitted.
 #' @param data_ctrl An object of class \code{data.frame} (or one that can be coerced to that class)
 #' containing data of all variables used in the model for the control group.
-#' @param data_pt An object of class \code{data.frame} (or one that can be coerced to that class)
-#' containing data of all variables used in the model for the patient.
+#' @param data_sc An object of class \code{data.frame} (or one that can be coerced to that class)
+#' containing data of all variables used in the model for the Single Case
 #' @param cores The number of cores to use when executing the Markov chains in parallel. The default is 1.
 #' @param chains Number of Markov chains (defaults to 4).
 #' @param iter Number of total iterations per chain (including warmup; defaults to 4000).
@@ -105,7 +105,7 @@ NULL
 #' mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
 #'             (Body.District + Congruency + Side | ID),
 #'             data_ctrl = data.ctrl,
-#'             data_pt = data.pt,
+#'             data_sc = data.pt,
 #'             cores = 4)
 #'
 #'  # generate a summary of the results
@@ -161,7 +161,7 @@ NULL
 #'
 #' # fit the single case model
 #'
-#' mdl.reg <- BMSC(y ~ x, data_ctrl = dat.ctrl, data_pt = dat.pt, seed = 10)
+#' mdl.reg <- BMSC(y ~ x, data_ctrl = dat.ctrl, data_sc = dat.pt, seed = 10)
 #'
 #' # summarize the data
 #'
@@ -171,7 +171,7 @@ NULL
 #' @return a \code{BMSC} object
 #'
 #' @export
-BMSC <- function(formula, data_ctrl, data_pt,
+BMSC <- function(formula, data_ctrl, data_sc,
                 cores = 1, chains = 4, warmup = 2000,
                 iter = 4000, seed = NA, typeprior = "normal",
                 ...){
@@ -187,7 +187,7 @@ BMSC <- function(formula, data_ctrl, data_pt,
 
   if(missing(formula)) stop("the argument \"formula\" is not specified")
   if(missing(data_ctrl)) stop("the dataframe \"data_ctrl\" is not specified")
-  if(missing(data_pt)) stop("the dataframe \"data_pt\" is not specified")
+  if(missing(data_sc)) stop("the dataframe \"data_sc\" is not specified")
   if(typeprior!="normal"&&typeprior!="cauchy"&&typeprior!="student")
       stop("Not a valid typeprior")
 
@@ -201,7 +201,7 @@ BMSC <- function(formula, data_ctrl, data_pt,
 
   matrix.fix.ctrl <- model.matrix(as.formula(fix.formula),data_ctrl)
 
-  matrix.fix.pt   <- model.matrix(as.formula(fix.formula),data_pt)
+  matrix.fix.pt   <- model.matrix(as.formula(fix.formula),data_sc)
 
   # build contrasts matrices for random effects
   ran.terms       <- form.terms[(grepl("\\|",form.terms))]
@@ -217,13 +217,13 @@ BMSC <- function(formula, data_ctrl, data_pt,
   stancode <- .building.model(ran.matrices,typeprior)
 
   datalist <- .building.data.list(ran.matrices,grouping,matrix.fix.ctrl,
-                                 matrix.fix.pt,data_ctrl,data_pt,formula)
+                                 matrix.fix.pt,data_ctrl,data_sc,formula)
 
   mdl <- stan(model_code = stancode, data = datalist, iter = iter,
              chains = chains,cores = cores, warmup = warmup,
              seed = seed, ...)
 
-  out <- list(formula,mdl,data_pt,data_ctrl,datalist,stancode,typeprior)
+  out <- list(formula,mdl,data_sc,data_ctrl,datalist,stancode,typeprior)
 
   class(out) <- append(class(out),"BMSC")
 
@@ -251,6 +251,8 @@ BMSC <- function(formula, data_ctrl, data_pt,
   code.transformed.parameter <-   "transformed parameters{
     real mu_Pts[Obs_Patients];
     real mu_Ctrl[Obs_Controls];"
+
+  code.transformed.parameter2 <- ""
 
   last.string.code.transformed.parameter <- "
 
@@ -331,8 +333,11 @@ BMSC <- function(formula, data_ctrl, data_pt,
 
         code.transformed.parameter <- paste(code.transformed.parameter,
                                            paste0("    matrix[Nrands",ir,",Ngrouping",ir,"] u",ir,";"),
-                                           paste0("    u",ir," = (diag_pre_multiply(sigma_u",ir,", L_Omega",ir,") * z_u",ir,"); //random effects for grouping factor",ir),
                                            sep="\n")
+
+        code.transformed.parameter2 <- paste(code.transformed.parameter2,
+                                            paste0("    u",ir," = (diag_pre_multiply(sigma_u",ir,", L_Omega",ir,") * z_u",ir,"); //random effects for grouping factor",ir),
+                                            sep="\n")
 
         last.string.code.transformed.parameter <- paste(last.string.code.transformed.parameter,
                                                        paste0("+ dot_product(u",ir,"[,grouping",ir,"[i]],XR_Ctrl",ir,"[i,])"))
@@ -366,6 +371,7 @@ BMSC <- function(formula, data_ctrl, data_pt,
   }
 
   code.transformed.parameter <- paste(code.transformed.parameter,
+                                      code.transformed.parameter2,
                                      paste0(last.string.code.transformed.parameter,";"),
                                      "    }",sep="\n")
 
@@ -383,12 +389,12 @@ BMSC <- function(formula, data_ctrl, data_pt,
 
 .building.data.list <- function(ran.matrices = NULL, grouping,
                                matrix.fix.ctrl, matrix.fix.pt,
-                               data_ctrl, data_pt, formula){
+                               data_ctrl, data_sc, formula){
   data.list <- list(
     Nparameters = ncol(matrix.fix.ctrl),
 
     y_Ctrl=data_ctrl[,as.character(formula[2])],
-    y_Pts =data_pt[,as.character(formula[2])],
+    y_Pts =data_sc[,as.character(formula[2])],
 
     XF_Ctrl=matrix.fix.ctrl,
     XF_Pts =matrix.fix.pt,

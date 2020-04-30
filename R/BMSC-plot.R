@@ -1,17 +1,16 @@
-#' Posterior predictive checks for BMSC objects
+#' Posterior predictive check for BMSC objects
 #'
 #' \code{pp_check()} plots the posterior predictive check for BMSC objects.
 #'
-#' @param object a BMSC object
-#' @param type
+#' @param object a \link{BMSC} object
+#' @param type a parameter to select the typology of graph
 #' \describe{
-#'         \item{text}{the numeric posterior predicitve p-value (should be around 0.5)}
 #'         \item{dens}{density overlay plot}
 #'         \item{hist}{histogram plot}
-#'         \item{mean}{the distribution of the mean statistic, over the simulated datasets, compared to the mean of the real data}
-#'     }
-#' @param limited logical. TRUE if the output should be limited within 4 standard deviations, FALSE it should not. default FALSE
-#' @param ... other arguments for \code{bayesplot} methods.
+#'         \item{mode}{the distribution of the mode statistic, over the simulated datasets, compared to the mode of the real data}
+#' }
+#' @param limited logical. TRUE if the output should be limited within the 95\% credible interval, FALSE it should not. Default FALSE.
+#' @param ... other arguments are ignored.
 #'
 #' @examples
 #'  \dontrun{
@@ -49,7 +48,7 @@
 #' random.normal <- matrix( rnorm( n = ncol(U) * numobs, mean = 3, sd = 1),
 #'                  nrow = ncol(U), ncol = numobs)
 #'
-#' X = U %*% random.normal
+#' X = U \%*\% random.normal
 #'
 #' dat.pt <- as.data.frame(t(X))
 #'
@@ -71,14 +70,14 @@
 #'
 #' pp_check(mdl.reg, limited = TRUE)
 #'
-#' pp_check(mdl.reg, type = "mean", limited = FALSE)
+#' pp_check(mdl.reg, type = "mode", limited = FALSE)
 #'
 #' pp_check(mdl.reg, type = "hist", limited = FALSE)
 #' }
 #'
 #' @return a ggplot2 object
 #' @export
-pp_check.BMSC = function(object, type = "text", limited = FALSE, ...) {
+pp_check.BMSC = function(object, type = "dens", limited = FALSE , ...) {
 
     if (class(object)[2] != "BMSC")
         stop("Not a valid BMSC object.")
@@ -91,41 +90,34 @@ pp_check.BMSC = function(object, type = "text", limited = FALSE, ...) {
 
     ans = list()
 
-    if( type == "text" ) {
-      ans = list(
-        "Control group PPP" = mean( apply(y_ct_rep[[1]] , 2 , mean) > mean( y_ct ) ),
-        "Patient PPP"       = mean( apply(y_pt_rep[[1]] , 2 , mean) > mean( y_pt ) )
-      )
-    }
-
     if ((requireNamespace("bayesplot", quietly = TRUE)) && (requireNamespace("gridExtra", quietly = TRUE))) {
         if (type == "hist") {
             ct = bayesplot::ppc_hist(y_ct, y_ct_rep[[1]][1:8, ], ...) + ggtitle("Control Group")
-            pt = bayesplot::ppc_hist(y_pt, y_pt_rep[[1]][1:8, ], ...) + ggtitle("Patient")
+            pt = bayesplot::ppc_hist(y_pt, y_pt_rep[[1]][1:8, ], ...) + ggtitle("Single Case")
 
             if (limited) {
-                ct = ct + coord_cartesian(xlim = quantile(y_ct , probs = c(0.001 , 0.999)) - c(IQR(y_ct) , -IQR(y_ct) ) )
-                pt = pt + coord_cartesian(xlim = quantile(y_pt , probs = c(0.001 , 0.999)) - c(IQR(y_pt) , -IQR(y_pt) ) )
+                ct = ct + coord_cartesian(xlim = quantile(y_ct , probs = c(0.025 , 0.975)) - c(IQR(y_ct) , -IQR(y_ct) ) )
+                pt = pt + coord_cartesian(xlim = quantile(y_pt , probs = c(0.025 , 0.975)) - c(IQR(y_pt) , -IQR(y_pt) ) )
             }
 
             ans = gridExtra::grid.arrange(ct, pt)
-        } else if (type == "mean") {
-            ct = bayesplot::ppc_stat(y_ct, y_ct_rep[[1]], ...) + ggtitle("Control Group")
-            pt = bayesplot::ppc_stat(y_pt, y_pt_rep[[1]], ...) + ggtitle("Patient")
+        } else if (type == "mode") {
+            ct = bayesplot::ppc_stat(y_ct, y_ct_rep[[1]], stat = "Mode" , ...) + ggtitle("Control Group")
+            pt = bayesplot::ppc_stat(y_pt, y_pt_rep[[1]], stat = "Mode" , ...) + ggtitle("Single Case")
 
             if (limited) {
-                ct = ct + coord_cartesian(xlim = quantile(y_ct , probs = c(0.001 , 0.999)) - c(IQR(y_ct) , -IQR(y_ct) ) )
-                pt = pt + coord_cartesian(xlim = quantile(y_pt , probs = c(0.001 , 0.999)) - c(IQR(y_pt) , -IQR(y_pt) ) )
+                ct = ct + coord_cartesian(xlim = quantile(y_ct , probs = c(0.025 , 0.975)) - c(IQR(y_ct) , -IQR(y_ct) ) )
+                pt = pt + coord_cartesian(xlim = quantile(y_pt , probs = c(0.025 , 0.975)) - c(IQR(y_pt) , -IQR(y_pt) ) )
             }
 
             ans = gridExtra::grid.arrange(ct, pt)
         } else {
             ct = bayesplot::ppc_dens_overlay(y_ct, y_ct_rep[[1]][1:200, ], ...) + ggtitle("Control Group")
-            pt = bayesplot::ppc_dens_overlay(y_pt, y_pt_rep[[1]][1:200, ], ...) + ggtitle("Patient")
+            pt = bayesplot::ppc_dens_overlay(y_pt, y_pt_rep[[1]][1:200, ], ...) + ggtitle("Single Case")
 
             if (limited) {
-                ct = ct + coord_cartesian(xlim = quantile(y_ct , probs = c(0.001 , 0.999)) - c(IQR(y_ct) , -IQR(y_ct) ) )
-                pt = pt + coord_cartesian(xlim = quantile(y_pt , probs = c(0.001 , 0.999)) - c(IQR(y_pt) , -IQR(y_pt) ) )
+                ct = ct + coord_cartesian(xlim = quantile(y_ct , probs = c(0.025 , 0.975)) - c(IQR(y_ct) , -IQR(y_ct) ) )
+                pt = pt + coord_cartesian(xlim = quantile(y_pt , probs = c(0.025 , 0.975)) - c(IQR(y_pt) , -IQR(y_pt) ) )
             }
 
             ans = gridExtra::grid.arrange(ct, pt)
@@ -140,10 +132,10 @@ pp_check.BMSC = function(object, type = "text", limited = FALSE, ...) {
 #' @param x An object of class \link{BMSC}.
 #' @param who parameter to choose the estimates to plot
 #' \describe{
-#'         \item{both}{plot in the same graph both controls and the patient}
+#'         \item{both}{plot in the same graph both controls and the Single Case}
 #'         \item{control}{only the controls}
-#'         \item{patient}{only the patient \eqn{(\beta + \delta)}}
-#'         \item{delta}{only the difference between the patient and controls}
+#'         \item{single}{only the Single Case \eqn{(\beta + \delta)}}
+#'         \item{delta}{only the difference between the Single Case and controls}
 #' }
 #' @param type a parameter to select the typology of graph
 #' \describe{
@@ -233,7 +225,7 @@ pp_check.BMSC = function(object, type = "text", limited = FALSE, ...) {
 #'
 #' # plot the results of the patient
 #'
-#' plot(mdl.reg, who = "patient")
+#' plot(mdl.reg, who = "single")
 #'
 #' # plot the results of the difference between the control group and the patient
 #'
@@ -284,7 +276,7 @@ plot.BMSC = function(x, who = "both", type = "interval", CI = 0.95, ...) {
             dat <- data.frame(low = controls[1, ], med = controls[2, ], high = controls[3, ], i = ordered(namC, level = namC[length(namC):1]))
 
             ans <- ggplot2::ggplot(dat, aes(x = i, ymin = low, ymax = high, y = med)) + geom_pointrange() + coord_flip() + xlab("coefficients") + ylab("")
-        } else if (who == "patient") {
+        } else if (who == "single") {
             beta <- extract(x[[2]], pars = "b_Ctrl")
             delta <- extract(x[[2]], pars = "b_Delta")
             patient <- apply(delta[[1]] + beta[[1]], 2, quantile, probs = c(limits[1], 0.5, limits[2]))
@@ -339,7 +331,7 @@ plot.BMSC = function(x, who = "both", type = "interval", CI = 0.95, ...) {
                 dat <- controls
 
                 ans <- ggplot2::ggplot(dat, aes(x = value)) + geom_density() + facet_grid(Var2 ~ .) + xlab("coefficients") + ylab("")
-            } else if (who == "patient") {
+            } else if (who == "single") {
                 beta <- extract(x[[2]], pars = "b_Ctrl")
                 delta <- extract(x[[2]], pars = "b_Delta")
                 tmp <- delta[[1]] + beta[[1]]
@@ -384,7 +376,7 @@ plot.BMSC = function(x, who = "both", type = "interval", CI = 0.95, ...) {
                 patient$Var2 <- factor(patient$Var2)
                 levels(patient$Var2) <- namP
                 patient$Var2 <- ordered(patient$Var2, level = namP[length(namP):1])
-                patient$group = "Patient"
+                patient$group = "Single Case"
 
                 dat <- rbind(patient, controls)
 
@@ -401,7 +393,7 @@ plot.BMSC = function(x, who = "both", type = "interval", CI = 0.95, ...) {
                 dat <- controls
 
                 ans <- ggplot2::ggplot(dat, aes(x = value)) + geom_histogram() + facet_grid(Var2 ~ .) + xlab("coefficients") + ylab("")
-            } else if (who == "patient") {
+            } else if (who == "single") {
                 beta <- extract(x[[2]], pars = "b_Ctrl")
                 delta <- extract(x[[2]], pars = "b_Delta")
                 tmp <- delta[[1]] + beta[[1]]
@@ -531,7 +523,7 @@ plot.pairwise.BMSC = function(x, type = "interval", CI = 0.95, ...) {
       ggplot2::ggplot(dat1, aes(x = i, ymin = low, ymax = high, y = med)) +
         geom_pointrange() + coord_flip() + xlab("coefficients") + ylab(""),
       ggplot2::ggplot(dat2, aes(x = i, ymin = low, ymax = high, y = med)) +
-        geom_pointrange() + coord_flip() + xlab("coefficients") + ylab("")
+        geom_pointrange() + coord_flip() + xlab("contrasts") + ylab("")
     )
   } else if (type == "area") {
         betas  <- do.call("rbind", x[[5]])
@@ -548,7 +540,7 @@ plot.pairwise.BMSC = function(x, type = "interval", CI = 0.95, ...) {
 
         ans <- list(
           ggplot2::ggplot(dat1, aes(x = y)) + geom_density() + facet_grid(name ~ .) + xlab("coefficients") + ylab(""),
-          ggplot2::ggplot(dat2, aes(x = y)) + geom_density() + facet_grid(contrast ~ .) + xlab("contrast") + ylab("")
+          ggplot2::ggplot(dat2, aes(x = y)) + geom_density() + facet_grid(contrast ~ .) + xlab("contrasts") + ylab("")
         )
   } else if (type == "hist") {
     betas  <- do.call("rbind", x[[5]])
@@ -565,7 +557,7 @@ plot.pairwise.BMSC = function(x, type = "interval", CI = 0.95, ...) {
 
     ans <- list(
       ggplot2::ggplot(dat1, aes(x = y)) + geom_histogram() + facet_grid(name ~ .) + xlab("coefficients") + ylab(""),
-      ggplot2::ggplot(dat2, aes(x = y)) + geom_histogram() + facet_grid(contrast ~ .) + xlab("contrast") + ylab("")
+      ggplot2::ggplot(dat2, aes(x = y)) + geom_histogram() + facet_grid(contrast ~ .) + xlab("contrasts") + ylab("")
     )
   }
 

@@ -11,10 +11,10 @@
 
 \item{who}{parameter to choose the estimates to plot
 \describe{
-        \item{both}{plot in the same graph both controls and the patient}
+        \item{both}{plot in the same graph both controls and the Single Case}
         \item{control}{only the controls}
-        \item{patient}{only the patient \eqn{(\beta + \delta)}}
-        \item{delta}{only the difference between the patient and controls}
+        \item{single}{only the Single Case \eqn{(\beta + \delta)}}
+        \item{delta}{only the difference between the Single Case and controls}
 }}
 
 \item{type}{a parameter to select the typology of graph
@@ -113,7 +113,7 @@ plot(mdl.reg)
 
 # plot the results of the patient
 
-plot(mdl.reg, who = "patient")
+plot(mdl.reg, who = "single")
 
 # plot the results of the difference between the control group and the patient
 

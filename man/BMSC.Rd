@@ -7,7 +7,7 @@
 BMSC(
   formula,
   data_ctrl,
-  data_pt,
+  data_sc,
   cores = 1,
   chains = 4,
   warmup = 2000,
@@ -23,8 +23,8 @@ BMSC(
 \item{data_ctrl}{An object of class \code{data.frame} (or one that can be coerced to that class)
 containing data of all variables used in the model for the control group.}
 
-\item{data_pt}{An object of class \code{data.frame} (or one that can be coerced to that class)
-containing data of all variables used in the model for the patient.}
+\item{data_sc}{An object of class \code{data.frame} (or one that can be coerced to that class)
+containing data of all variables used in the model for the Single Case}
 
 \item{cores}{The number of cores to use when executing the Markov chains in parallel. The default is 1.}
 
@@ -67,7 +67,7 @@ a \code{BMSC} object
 mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
             (Body.District + Congruency + Side | ID),
             data_ctrl = data.ctrl,
-            data_pt = data.pt,
+            data_sc = data.pt,
             cores = 4)
 
  # generate a summary of the results
@@ -123,7 +123,7 @@ cor(dat.pt)
 
 # fit the single case model
 
-mdl.reg <- BMSC(y ~ x, data_ctrl = dat.ctrl, data_pt = dat.pt, seed = 10)
+mdl.reg <- BMSC(y ~ x, data_ctrl = dat.ctrl, data_sc = dat.pt, seed = 10)
 
 # summarize the data
 

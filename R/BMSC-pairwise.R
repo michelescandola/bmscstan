@@ -11,8 +11,8 @@
 #' @param who parameter to choose the estimates to contrast
 #' \describe{
 #'         \item{control}{only the controls}
-#'         \item{patient}{only the patient \eqn{(\beta + \delta)}}
-#'         \item{delta}{only the difference between the patient and controls}
+#'         \item{singlecase}{only the single case \eqn{(\beta + \delta)}}
+#'         \item{delta}{only the difference between the single case and controls}
 #' }
 #'
 #' @examples
@@ -21,12 +21,12 @@
 #'  data(BSE)
 #'
 #' # Normal regression of data coming from a body representation paradigm
-#' # with a control sample of 12 participants and one patient with
+#' # with a control sample of 12 participants and one single case with
 #' # unilateral brachial plexus lesion
 #' mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
 #'             (Body.District + Congruency + Side | ID),
 #'             data_ctrl = data.ctrl,
-#'             data_pt = data.pt,
+#'             data_sc = data.pt,
 #'             cores = 4)
 #'
 #'  # generate a summary of the results
@@ -53,6 +53,8 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
     len <- NULL
     i <- 1
 
+    ## in this loop I store in len the number of main effects present in every coefficients (main effects and interactions)
+    ## and I check, for each coefficient, how many of the main effects involved in the contrast are present, storing it in out
     for(m in M){
       len <- c(len , length(m))
       for(cp in contr.parts){
@@ -63,7 +65,12 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
       i <- i +1
     }
 
-    return(as.numeric(names(which(len[out] == table(out)))))
+    ## table for out
+    tab.out <- table( out )
+
+    ## return the indexes of all the coefficients involved in the contrast
+    ## if the total number of main effects (in len)
+    return(as.numeric(names(which(len[unique(out)] == tab.out))))
   }
 
   se <- function(object) {
@@ -100,7 +107,7 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
     tmp.data <- mdl[[4]]
     contr.names <- colnames(mdl[[5]]$XF_Ctrl)
     contr.table <- mdl[[5]]$XF_Ctrl
-  } else if(who == "patient"){
+  } else if(who == "singlecase"){
     delta <- rstan::extract(mdl[[2]], pars = "b_Delta")
     ctrl  <- rstan::extract(mdl[[2]], pars = "b_Ctrl")
     tmp.post <- list(delta[[1]] + ctrl[[1]])

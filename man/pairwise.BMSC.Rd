@@ -18,8 +18,8 @@ quotient of the linear predictors is computed. In order for this to be useful,
 \item{who}{parameter to choose the estimates to contrast
 \describe{
         \item{control}{only the controls}
-        \item{patient}{only the patient \eqn{(\beta + \delta)}}
-        \item{delta}{only the difference between the patient and controls}
+        \item{singlecase}{only the single case \eqn{(\beta + \delta)}}
+        \item{delta}{only the difference between the single case and controls}
 }}
 }
 \value{
@@ -34,12 +34,12 @@ Calculate pairwise comparisons between marginal posterior distributions divided 
  data(BSE)
 
 # Normal regression of data coming from a body representation paradigm
-# with a control sample of 12 participants and one patient with
+# with a control sample of 12 participants and one single case with
 # unilateral brachial plexus lesion
 mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
             (Body.District + Congruency + Side | ID),
             data_ctrl = data.ctrl,
-            data_pt = data.pt,
+            data_sc = data.pt,
             cores = 4)
 
  # generate a summary of the results

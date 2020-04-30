@@ -6,7 +6,7 @@
 \title{Bayesian Multilevel Single Case models using 'Stan'}
 \description{
 The \strong{bmscstan} package provides an interface to fit Bayesian Multilevel Single Case models.
-These models compare the performance of a single patient against a control group, combining
+These models compare the performance of a Single Case against a control group, combining
 the flexibility of multilevel models and the potentiality of Bayesian Statistics.
 }
 \details{
@@ -14,7 +14,7 @@ The package is now limited to gaussian data only, but we will further expand it 
 binomial and ordinal (Likert scales) data.
 
 By means of \strong{bmscstan} the effects of the control group and the effects of the deviance between the
-patient and the group will be esimated.
+Single Case and the group will be esimated.
 
 The model to estimate the controls parameters is:
 
@@ -25,7 +25,7 @@ Effects, and \eqn{\beta} are the unknown coefficients to be estimate. \eqn{Z} is
 Varying (or Random, or Group-level) effects, and \eqn{b} are the unknown estimates for the varying effects.
 \eqn{\sigma^2} is the variance.
 
-In order to estimate the coefficients of the patient, the formula is the following:
+In order to estimate the coefficients of the Single Case, the formula is the following:
 
 \deqn{y_{pt}~\mathcal{N}(\phi X_{pt}, \sigma_{pt}^2)}
 

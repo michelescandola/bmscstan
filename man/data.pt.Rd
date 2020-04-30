@@ -3,7 +3,7 @@
 \docType{data}
 \name{data.pt}
 \alias{data.pt}
-\title{Data from a patient with brachial plexious lesion}
+\title{Data from a Single Case with brachial plexious lesion}
 \format{
 A data frame with 467 rows and 4 variables
 \describe{
@@ -18,7 +18,7 @@ A data frame with 467 rows and 4 variables
 data.pt
 }
 \description{
-A dataset containing the results from the Body Sidednedd Task
-from a single patient
+A dataset containing the results from the Body Sidedness Task
+from a single Single Case
 }
 \keyword{datasets}
