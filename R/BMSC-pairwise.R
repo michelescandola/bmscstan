@@ -65,14 +65,6 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
       i <- i +1
     }
 
-    suppresslogspline <- function(x){
-      suppressWarnings(logspline::logspline(x))
-    }
-
-    suppressdlogspline <- function(x){
-      suppressWarnings(logspline::dlogspline(x))
-    }
-
     ## table for out
     tab.out <- table( out )
 
@@ -173,8 +165,8 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
   sum.unique <- list()
 
   for(marginal_name in marginal_distribution){
-    sum_logspl <- suppresslogspline(marginal_name$y)
-    bf_sd <- d0/suppressdlogspline(0, sum_logspl)
+    sum_logspl <- .suppresslogspline(marginal_name$y)
+    bf_sd <- d0/.suppressdlogspline(0, sum_logspl)
 
     sum.unique[[marginal_name$name[1]]] <- as.data.frame(cbind(mean(marginal_name$y),
                                                                se(marginal_name$y),
@@ -202,8 +194,8 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
     for(j in (i+1):length(marginal_distribution)){
       tmp.y <- marginal_distribution[[i]]$y - marginal_distribution[[j]]$y
 
-      sum_logspl <- suppresslogspline(tmp.y)
-      bf_sd <- d0/suppressdlogspline(0, sum_logspl)
+      sum_logspl <- .suppresslogspline(tmp.y)
+      bf_sd <- d0/.suppressdlogspline(0, sum_logspl)
 
       sum.contrast[[paste(i,j)]] <- as.data.frame(cbind(mean(tmp.y),
                                                                  se(tmp.y),
