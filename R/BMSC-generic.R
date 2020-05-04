@@ -22,6 +22,10 @@ summary.BMSC = function(object, ...) {
       suppressWarnings(logspline::logspline(x))
     }
 
+    suppressdlogspline <- function(x){
+      suppressWarnings(logspline::dlogspline(x))
+    }
+
     if (object[[7]] == "normal") {
         d0 <- dnorm(0, 0, 10)
     } else if (object[[7]] == "cauchy") {
@@ -33,19 +37,19 @@ summary.BMSC = function(object, ...) {
     delta = extract(object[[2]], pars = "b_Delta")
     delta_logspl = apply(delta$b_Delta, 2, suppresslogspline)
     BF10_delta = lapply(delta_logspl, FUN = function(x) {
-        d0/logspline::dlogspline(0, x)
+        d0/suppressdlogspline(0, x)
     })
 
     beta = extract(object[[2]], pars = "b_Ctrl")
     beta_logspl = apply(beta$b_Ctrl, 2, suppresslogspline)
     BF10_beta = lapply(beta_logspl, FUN = function(x) {
-        d0/logspline::dlogspline(0, x)
+        d0/suppressdlogspline(0, x)
     })
 
     pts = beta$b_Ctrl + delta$b_Delta
     pts_logspl = apply(pts, 2, suppresslogspline)
     BF10_pts = lapply(pts_logspl, FUN = function(x) {
-        d0/logspline::dlogspline(0, x)
+        d0/suppressdlogspline(0, x)
     })
 
     sum01 = as.data.frame(summary(object[[2]], pars = "b_Ctrl")[[1]])
