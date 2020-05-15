@@ -219,9 +219,9 @@ BMSC <- function(formula, data_ctrl, data_sc,
   datalist <- .building.data.list(ran.matrices,grouping,matrix.fix.ctrl,
                                  matrix.fix.pt,data_ctrl,data_sc,formula)
 
-  mdl <- stan(model_code = stancode, data = datalist, iter = iter,
+  mdl <- suppressMessages(stan(model_code = stancode, data = datalist, iter = iter,
              chains = chains,cores = cores, warmup = warmup,
-             seed = seed, ...)
+             seed = seed, ...))
 
   out <- list(formula,mdl,data_sc,data_ctrl,datalist,stancode,typeprior)
 
