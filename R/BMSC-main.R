@@ -1,27 +1,36 @@
 #' Bayesian Multilevel Single Case models using 'Stan'
 #'
-#' The \strong{bmscstan} package provides an interface to fit Bayesian Multilevel Single Case models.
-#' These models compare the performance of a Single Case against a control group, combining
-#' the flexibility of multilevel models and the potentiality of Bayesian Statistics.
+#' The \strong{bmscstan} package provides an interface to fit Bayesian
+#' Multilevel Single Case models.
+#' These models compare the performance of a Single Case against a control
+#' group, combining
+#' the flexibility of multilevel models and the potentiality of Bayesian
+#' Statistics.
 #'
-#' The package is now limited to gaussian data only, but we will further expand it to cover
+#' The package is now limited to gaussian data only, but we will further expand
+#' it to cover
 #' binomial and ordinal (Likert scales) data.
 #'
-#' By means of \strong{bmscstan} the effects of the control group and the effects of the deviance between the
+#' By means of \strong{bmscstan} the effects of the control group and the
+#' effects of the deviance between the
 #' Single Case and the group will be esimated.
 #'
 #' The model to estimate the controls parameters is:
 #'
-#' \deqn{y~N(\beta X + b Z, \sigma^2)}
+#'\ifelse{html}{\out{<center><i>y~N(&beta; X + b Z, &sigma;<sup>2</sup>)</i></center>}}{\eqn{y~N(\beta X + b Z, \sigma^2)}}
 #'
-#' where \eqn{y} is the controls' dependent variable, \eqn{X} the contrast matrix for Population-level (or Fixed)
-#' Effects, and \eqn{\beta} are the unknown coefficients to be estimate. \eqn{Z} is the contrast matrix for the
-#' Varying (or Random, or Group-level) effects, and \eqn{b} are the unknown estimates for the varying effects.
+#'
+#' where \eqn{y} is the controls' dependent variable, \eqn{X} the contrast
+#' matrix for Population-level (or Fixed)
+#' Effects, and \eqn{\beta} are the unknown coefficients to be estimate. \eqn{Z}
+#' is the contrast matrix for the
+#' Varying (or Random, or Group-level) effects, and \eqn{b} are the unknown
+#' estimates for the varying effects.
 #' \eqn{\sigma^2} is the variance.
 #'
 #' In order to estimate the coefficients of the Single Case, the formula is the following:
 #'
-#' \deqn{y_{pt}~\mathcal{N}(\phi X_{pt}, \sigma_{pt}^2)}
+#' \ifelse{html}{\out{<center><i>y<sub>pt</sub>~N(&phi; X<sub>pt</sub>, &sigma;<sup>2</sup><sub>pt</<sub>)</i></center>}}{\eqn{y_{pt}~N(\phi X_{pt}, \sigma_{pt}^2)}}
 #'
 #' where \eqn{\phi = \beta + \delta}.
 #'
