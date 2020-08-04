@@ -1,0 +1,255 @@
+---
+title: Fitting Bayesian Multilevel Single Case models using bmscstan
+author: "Michele Scandola"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+bibliography: references.bib
+vignette: >
+  %\VignetteIndexEntry{Fitting Bayesian Multilevel Single Case models using bmscstan}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+The package **bmscstan** provides useful functions to fit
+Bayesian Multilevel Single Case models (BMSC) using as
+backend *Stan* [@Carpenter2017].
+
+This approach is based on the seminal approach of the Crawford's tests
+[@Crawford1998; @Crawford2005; @Crawford2010], using a small control
+sample of individuals, 
+to see whether the performance of the single case deviates from them.
+Unfortunately, Crawford's tests are limited to a number of specific
+experimental designs that do not allow researchers to use complex
+experimental designs.
+
+The BMSC approach is born mainly to deal with this problem: its purpose is,
+in fact, to allow the fitting of models with the same flexibility
+of a Multilevel Model, with single case and controls data.
+
+The core function of the **bmscstan** package is `BMSC`,
+whose theoretical assumptions, and its validation are
+reported in [@scandola_romano_2020].
+
+The syntax used by the `BMSC` function is extremely similar to the syntax
+used in the `lme4` package. However, the specification of random effects
+is limited, but it can cover the greatest part of cases
+(for further details, please see `?bmscstan::randomeffects`).
+
+## Example on real data
+
+In order to show an example on the use of the **bmscstan** package,
+the datasets in this package will be used.
+
+In these datasets we have data coming from a Body Sidedness Effect paradigm
+[@Ottoboni2005; @Tessari2012], that is a Simon-like paradigm useful to
+measure body representation.
+
+In this experimental paradigm, participants have to answer to a circle 
+showed in the centre of the computer screen, superimposed to
+an irrelevant image of a left or right hand, or to a left or right foot.
+
+The circle can be of two colors (e.g. red or blue), and participants have
+to press one button with the left when the circle is of a specific colour,
+and with the right hand when the circle is of the another colour.
+
+When the irrelevant background image (foot or hand) is incongruent with
+the hand used to answer, the reaction times and frequency of errors are higher.
+
+The two irrelevant backgrounds are administered in different experimental blocks.
+
+This is considered an effect of the body representation.
+
+In the package there are two datasets, one composed by 16 healthy control
+participants, and the other one by an individual affected by right unilateral
+brachial plexus lesion (however, s/he could independently press the
+keyboard buttons).
+
+### Explore the data
+
+The datasets are called `data.pt` for the single case, and `data.ctrl` for the
+control group, and they can be loaded using `data(BSE)`.
+
+In these datasets there are the Reaction Times `RT`, a `Body.District` factor
+with levels FOOT and HAND, a `Congruency` factor (levels: Congruent,
+Incongruent), and a `Side` factor (levels: Left, Right). In the `data.ctrl`
+dataset there also is an `ID` factor, representing the different 16 control
+participants.
+
+```{r, fig.height= 6, fig.width= 6}
+library(bmscstan)
+
+data(BSE)
+
+str(data.pt)
+
+str(data.ctrl)
+
+ggplot(data.pt, aes(y = RT, x = Body.District:Side , fill = Congruency))+
+  geom_boxplot()
+
+ggplot(data.ctrl, aes(y = RT, x = Body.District:Side , fill = Congruency))+
+  geom_boxplot()+
+  facet_wrap( ~ ID , ncol = 4)
+```
+
+These data seem to have some outliers. Let see if they are normally distributed.
+
+```{r , fig.show='hold'}
+qqnorm(data.ctrl$RT, main = "Controls")
+qqline(data.ctrl$RT)
+
+qqnorm(data.pt$RT, main = "Single Case")
+qqline(data.pt$RT)
+```
+
+They are not normally distributed. Outliers will be removed by using the
+`boxplot.stats` function.
+
+```{r , fig.show='hold'}
+out <- boxplot.stats( data.ctrl$RT )$out
+data.ctrl <- droplevels( data.ctrl[ !data.ctrl$RT %in% out , ] )
+
+out <- boxplot.stats( data.pt$RT )$out
+data.pt <- droplevels( data.pt[ !data.pt$RT %in% out , ] )
+
+qqnorm(data.ctrl$RT, main = "Controls")
+qqline(data.ctrl$RT)
+
+qqnorm(data.pt$RT, main = "Single Case")
+qqline(data.pt$RT)
+```
+
+They are not perfect, but definitively better.
+
+### Deciding the contrasts and the random effects part
+
+First of all, there is the necessity to think to our hypotheses, and setting
+the contrast matrices consequently.
+
+In all cases, our factors have only two levels. Therefore, we set
+the factors with a Treatment Contrasts matrix, with baseline level
+for `Side` the _Left_ level, for `Congruency` the _Congruent_ level, and for
+`Body.District` the _FOOT_ level.
+
+In this way, each coefficient will represent the difference between the
+two levels.
+
+```{r}
+contrasts( data.ctrl$Side )          <- contr.treatment( n = 2 )
+contrasts( data.ctrl$Congruency )    <- contr.treatment( n = 2 )
+contrasts( data.ctrl$Body.District ) <- contr.treatment( n = 2 )
+
+contrasts( data.pt$Side )            <- contr.treatment( n = 2 )
+contrasts( data.pt$Congruency )      <- contr.treatment( n = 2 )
+contrasts( data.pt$Body.District )   <- contr.treatment( n = 2 )
+```
+
+
+The use of the `BMSC` function, for those who are used to `lme4` or `brms`
+syntax should be straightforward.
+
+In this case, we want to fit the following model:
+
+`RT ~ Body.District * Congruency * Side + (Congruency+* Side | ID / Body.District)`
+
+Unfortunately, `BMSC` does not directly allow the syntax `ID / Body.District`
+in the specification of the random effects.
+
+In any case, taking into consideration that `(1 | ID / Body.District)` is a
+short
+version of `(1 | ID : Body.District) + (1 | ID)`, it is possible to solve this
+problem.
+
+It is necessary to create a new variable for `ID : Body.District`
+
+```{r}
+data.ctrl$BD_ID <- interaction( data.ctrl$Body.District , data.ctrl$ID )
+```
+
+and the model would be:
+
+`RT ~ Body.District * Congruency * Side + (Congruency + Side | BD_ID) + (Congruency + Side | ID)`
+
+### Fitting the BMSC model
+
+At this point, fitting the model is easy, and it can be done with the use of
+a single function.
+
+```{r}
+mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
+             (Congruency + Side | ID) + (Congruency + Side | BD_ID),
+             data_ctrl = data.ctrl,
+             data_sc = data.pt,
+             cores = 4,
+             seed = 2020)
+```
+
+After fitting the model, we should check its quality by means of
+Posterior Predictive P-Values [@Gelman2013] with the `bmscstan::pp_check`
+function.
+
+Thanks to this graphical function, we will see if the observed data and the
+data sampled from the posterior distributions of our BMSC model are similar.
+
+If we observe strong deviations, it means that your BMSC model is not adequately
+describing your data. In this case, you might want to change the priors
+distribution (see the `help` page), change the random effects structure,
+or transform your dependent variable (using the logarithm or other math
+functions).
+
+```{r, fig.width=6, fig.height=6}
+pp_check( mdl )
+```
+
+In both the controls and the single case data, the Posterior Predictive P-Values
+check seems to adequately resemble the observed data.
+
+A further control on our model is given by checking the Effective Sample Size
+(ESS)
+for each coefficient and the $\hat{R}$ diagnostic index [@Gelman1992].
+
+The ESS is the "effective number of simulation draws" for any coefficient,
+namely the approximate number of independent draws, taking into account
+that the various simulations in a Monte Carlo Markov Chain (MCMC) are not 
+independent each other. For further details, see an introductory book in
+Bayesian Statistics. A good ESS estimates should be $ESS > 100$ or $ESS > 10\%$
+of the total draws (remembering that you should remove the burn-in simulations
+from the total iterations counting).
+
+The $\hat{R}$ is an index of the convergence of the MCMCs. In `BMSC` the default
+is 4. Usually, MCMCs are considered convergent when $\hat{R} < 1.1$ (*Stan*
+default).
+
+In order to check these values, the `summary.BMSC` function is needed
+(see next section).
+
+### The `summary.BMSC` output
+
+The output of the `brmscstan::summary.BMSC` function is divided in four main
+parts:
+
+1. In the first part, the model and the selected priors are recalled.
+2. In the second part, the coefficients of the fixed effects for the control
+  group are shown.
+3. In the third part, the coefficients of the fixed effects for the single
+  case are shown.
+4. In the fourth and last part, the fixed effects coefficients for the
+  difference between the single case and the control group are shown.
+
+```{r}
+print( summary( mdl ) , digits = 3 )
+```
+
+
+
+
+# References

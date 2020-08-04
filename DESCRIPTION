@@ -13,11 +13,14 @@ Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.5.0), rstan, logspline, bayesplot, LaplacesDemon, ggplot2
 Imports: coda
+VignetteBuilder: knitr
 Suggests:
     reshape2,
     gridExtra,
     loo,
     mcmcse,
     bridgesampling,
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
 RoxygenNote: 7.1.1

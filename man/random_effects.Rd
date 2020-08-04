@@ -1,9 +1,5 @@
-\name{random_effects}
-\alias{random_effect}
-\alias{random-effect}
-\alias{random-effects}
-\alias{random effect}
-\alias{random effects}
+\name{randomeffects}
+\alias{randomeffect}
 \title{Random Effects specification on
        Bayesian Multilevel Single Case models using 'Stan'}
 \description{

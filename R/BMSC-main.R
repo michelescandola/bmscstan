@@ -108,7 +108,7 @@ NULL
 #'
 #'  data(BSE)
 #'
-#' # Normal robust regression of data coming from a body representation paradigm
+#' # Linear regression of data coming from a body representation paradigm
 #' # with a control sample of 12 participants and one patient with
 #' # unilateral brachial plexus lesion
 #' mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
