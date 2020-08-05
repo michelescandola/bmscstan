@@ -1,23 +1,23 @@
 citHeader("To cite bmscstan in publications use:")
 
-citEntry(
-  entry    = "Article",
-  title    = "Bayesian Multilevel Single Case Models using \'Stan\'. A new tool to study single cases in Neuropsychology",
-  author   = c(person("Michele", "Scandola"),
-              person("Daniele", "Romano")),
-  journal  = "PsyArXiv",
-  year     = "2020",
-  url      = "https://psyarxiv.com/sajdq/"",
-  textVersion = paste(Scandola, M., & Romano, D. (2020, August 3). Bayesian
-  Multilevel Single Case Models using 'Stan'. A new tool to study single cases
-  in Neuropsychology. https://doi.org/10.31234/osf.io/sajdq
-  )
-)
+bibentry(bibtype = "Article",
+         title = "Bayesian Multilevel Single Case Models using \'Stan\'. A new tool to study single cases in Neuropsychology",
+         author = c(person("Michele", "Scandola",
+                        role = c("aut", "trl", "cre"),
+                        email = "michele.scandola@univr.it"),
+                        person(c("Daniele","L."),"Romano",role="aut")),
+         year = "2020",
+         journal  = "PsyArXiv",
+         url = "https://psyarxiv.com/sajdq/",
+         note = "R package version 1.0.0"
+         )
 
 bibentry(bibtype = "Manual",
          title = "bmscstan: Bayesian Multilevel Single Case models using \'Stan\'",
-         author = person("Michele", "Scandola"),
+         author = person("Michele", "Scandola",
+                        role = c("aut", "trl", "cre"),
+                        email = "michele.scandola@univr.it"),
          year = "2020",
          url = "https://github.com/michelescandola/bmscstan",
-         note = {R package version 1.0.0}
+         note = "R package version 1.0.0"
          )
