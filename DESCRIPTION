@@ -1,13 +1,15 @@
 Package: bmscstan
 Type: Package
 Title: Bayesian Multilevel Single Case Models using 'Stan'
-Version: 0.1.0
+Version: 1.0.0
 Author: Michele Scandola
 Maintainer: Michele Scandola <michele.scandola@univr.it>
 Description: Analyse single case analyses against a control group.
-    The purpose of this package is to provide a flexible, with good power and low first type error
+    The purpose of this package is to provide a flexible, with good power and
+    low first type error
     approach that can manage at the same time controls' and patient's data.
-    The use of Bayesian statistics allows to test both the alternative and null hypothesis.
+    The use of Bayesian statistics allows to test both the alternative and
+    null hypothesis.
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true

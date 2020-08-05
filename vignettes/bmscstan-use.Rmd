@@ -73,7 +73,7 @@ participants, and the other one by an individual affected by right unilateral
 brachial plexus lesion (however, s/he could independently press the
 keyboard buttons).
 
-### Explore the data
+## Explore the data
 
 The datasets are called `data.pt` for the single case, and `data.ctrl` for the
 control group, and they can be loaded using `data(BSE)`.
@@ -130,7 +130,7 @@ qqline(data.pt$RT)
 
 They are not perfect, but definitively better.
 
-### Deciding the contrasts and the random effects part
+## Deciding the contrasts and the random effects part
 
 First of all, there is the necessity to think to our hypotheses, and setting
 the contrast matrices consequently.
@@ -179,14 +179,14 @@ and the model would be:
 
 `RT ~ Body.District * Congruency * Side + (Congruency + Side | BD_ID) + (Congruency + Side | ID)`
 
-### Fitting the BMSC model
+## Fitting the BMSC model
 
 At this point, fitting the model is easy, and it can be done with the use of
 a single function.
 
 ```{r}
 mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
-             (Congruency + Side | ID) + (Congruency + Side | BD_ID),
+             (Congruency * Side | ID) + (Congruency * Side | BD_ID),
              data_ctrl = data.ctrl,
              data_sc = data.pt,
              cores = 4,
@@ -232,7 +232,7 @@ default).
 In order to check these values, the `summary.BMSC` function is needed
 (see next section).
 
-### The `summary.BMSC` output
+## The `summary.BMSC` output
 
 The output of the `brmscstan::summary.BMSC` function is divided in four main
 parts:
@@ -249,7 +249,237 @@ parts:
 print( summary( mdl ) , digits = 3 )
 ```
 
+In the second and fourth part of the output, we can observe a descriptive
+summary reporting the mean, the standard error, the standard deviation,
+the $2.5\%$, $25%$, $50\%$, $75\%$ and $97.5\%$ of the posterior distributions
+of each coefficient. If we want the $95\%$ Credible Interval, we can consider
+only the $2.5\%$ and $97.5\%$ extremes. Then, two diagnostic indexes are
+reported: the `n_eff` parameter, that is the *ESS*, and the `Rhat` ($\hat{R}$).
+Finally, the Savage-Dickey Bayes Factor is reported (*BF10*).
 
+In the third part the diagnostic indexes are not reported because these
+coefficients are computed as marginal probabilities from the
+probabilities summarized in the second and fourth part.
+
+## Understanding the `summary.BMSC` output
+
+### Checking the diagnostic indexes
+
+The first step should be controlling the diagnostic indexes.
+
+In this model, all `n_eff` are greater than the $10\%$ of the total iterations 
+(default iterations: 4000, default warmup iterations: 2000, default chains: 4 =
+`r (4000 - 2000) * 4 / 10`). Also, all $\hat{R}s < 1.1$. Finally, we already
+saw that the Posterior Predictive P-values are showing that the model is
+representative of the data.
+
+### The Control Group results
+
+Then, observing what the fixed effects of the Control group are showing
+is important before of seeing the differences with the single case.
+
+In this analysis, there are 5 fixed effects which $BF_{10}$ is greater than
+3 [@Raftery1995].
+
+- Intercept $BF_{10} > 150$, $\mu = 199.88$, $95\%~CI = [184.55; 215.072]$.
+- Body District $BF_{10} = 54.8$, $\mu = 17.20$, $95\%~CI = [6.22; 28.931]$.
+- Congruency $BF_{10} = 21.2$, $\mu = 16.10$, $95\%~CI = [4.08; 30.272]$.
+- Side $BF_{10} = 31.9$, $\mu = 19.11$, $95\%~CI = [5.01; 33.919]$.
+- Body District : Congruency $BF_{10} = 3.81$, $\mu = -10.03$,
+  $95\%~CI = [-19.84; -0.375]$.
+
+We can have a general overview of the coefficients of the model with the
+`plot.BMSC` function.
+
+```{r, fig.height=6, fig.width=6}
+plot( mdl , who = "control" )
+```
+
+The interaction between Body District and Congruency needs a further
+analysis to better understand the phenomenon. It comes useful the function
+`pairwise.BMSC`.
+
+```{r}
+pp <- pairwise.BMSC(mdl , contrast = "Body.District2:Congruency2" , who = "control")
+
+print( pp , digits = 3 )
+```
+
+The output of this function is divided in two parts:
+
+- a first part, called "Marginal distributions", where the marginal distributions of 
+  each level of the coefficients are reported with a $BF_{10}$ against zero.
+- a second part, called "Table of contrasts", with all possible pairwise
+  comparisons and their $BF_{10}$.
+
+It is also possible to plot the results of this function with the use of
+`plot.pairwise.BMSC`.
+
+```{r, fig.height=6, fig.width=6}
+plot( pp )
+```
+
+Finally, it is possible to plot marginal posterior distributions for each
+effects with $BF_{10} > 3$.
+
+```{r, fig.show = "hold"}
+p1 <- pairwise.BMSC(mdl , contrast = "Body.District2" ,  who = "control" )
+
+plot( p1 )[[1]] +
+  ggtitle("Body District" , subtitle = "Marginal effects") 
+
+plot( p1 )[[2]] +
+  ggtitle("Body District" , subtitle = "Contrasts") 
+
+p2 <- pairwise.BMSC(mdl , contrast = "Congruency2" ,  who = "control" )
+
+plot( p2 )[[1]] +
+  ggtitle("Congruency" , subtitle = "Marginal effects")
+
+plot( p2 )[[2]] +
+  ggtitle("Congruency" , subtitle = "Contrasts")
+
+p3 <- pairwise.BMSC(mdl , contrast = "Side2" ,  who = "control" )
+
+plot( p3 )[[1]] +
+  ggtitle("Side" , subtitle = "Marginal effects")
+
+plot( p3 )[[2]] +
+  ggtitle("Side" , subtitle = "Contrasts")
+```
+
+### The differences between the Control Group and the Single Case
+
+Finally, the difference between the Control Group and the Single Case
+is of interest.
+
+A general plot can be obtained in the following way, plotting both
+the Control Group and the Single Case:
+
+```{r, fig.width=6, fig.height=6}
+plot( mdl ) +
+  theme_bw( base_size = 18 )+
+  theme( legend.position = "bottom",
+         legend.direction = "horizontal")
+```
+
+or plotting only the difference
+
+```{r, fig.width=6, fig.height=6}
+plot( mdl ,who = "delta" ) +
+  theme_bw( base_size = 18 )
+```
+
+The relevant coefficients are:
+
+- Intercept $BF_{10} > 150$, $\mu = 194.97$, $95\%~CI = [179.54; 210.071]$.
+- Body District $BF_{10} = 134$, $\mu = 23.29$, $95\%~CI = [9.66; 36.945]$.
+- Congruency $BF_{10} > 150$, $\mu = 31.04$, $95\%~CI = [16.30; 45.651]$.
+- Side $BF_{10} > 150$, $\mu = 31.60$, $95\%~CI = [16.11; 46.469]$.
+- Body District : Congruency $BF_{10} = 8.47$, $\mu = -16.82$,
+  $95\%~CI = [-31.99; -1.750]$.
+- Body District : Side $BF_{10} = 7.31$, $\mu = -16.61$,
+  $95\%~CI = [-31.49; -1.474]$.
+- Body District : Congruency : Side $BF_{10} = 6.37$, $\mu = -16.85$,
+  $95\%~CI = [-33.74; -11.10]$.
+  
+The Intercept coefficient is showing us that the single case is generally
+slower than the Control Sample (generally speaking, when you analyse healthy
+controls
+against a single case with a specific disease, the single case is slower).
+
+All the main effects can be further analysed by simply looking at their
+estimates (knowing the contrast matrix and the direction of the estimate
+you can understand which level is greater than the other), or by means
+of the `pairwise.BMSC` function, if you also want marginal effects
+and automatic plots.
+
+The interactions require the use of the `pairwise.BMSC` function.
+
+#### The Body District : Congruency interaction:
+
+```{r}
+p4 <- pairwise.BMSC(mdl , contrast = "Body.District2:Congruency2" , who = "delta")
+
+print( p4 , digits = 3 )
+```
+
+The `pairwise.BMSC` function shows that in all cases the marginal effects of the
+RTs where greater than zero, but the differences where present only in
+the comparison between FOOT Congruent and the other cases.
+
+```{r, fig.show="hold"}
+plot( p4 , type = "interval")
+
+plot( p4 , type = "area")
+
+plot( p4 , type = "hist")
+```
+
+In this case we can observe that the single case was more facilitated
+by the FOOT Congruent condition than the Control Group.
+
+If the interpretation of the results is difficult, it can be useful look
+what happens in the Single Case marginal effects.
+
+```{r, fig.height=6, fig.width=6}
+p5 <- pairwise.BMSC(mdl , contrast = "Body.District2:Congruency2" ,
+                    who = "singlecase")
+
+plot( p5 , type = "hist")[[1]]
+```
+
+#### The Body District : Congruency interaction:
+
+```{r, fig.height=6, fig.width=6}
+p6 <- pairwise.BMSC(mdl , contrast = "Body.District2:Side2" , who = "delta")
+
+print( p6 , digits = 3 )
+
+plot( p6 , type = "hist")[[1]] +
+  theme_bw( base_size = 18)+
+  theme( strip.text.y = element_text( angle = 0 ) )
+```
+
+In this case, we can see that the left - right difference in the single
+case is always present, with faster RTs in the left foot than in the other
+cases.
+
+#### The Body District : Congruency : Side interaction:
+
+```{r, fig.height=6, fig.width=6}
+p7 <- pairwise.BMSC(mdl ,
+                    contrast = "Body.District2:Congruency2:Side2" ,
+                    who = "delta")
+
+print( p7 , digits = 3 )
+
+plot( p7 , type = "hist")[[1]] +
+  theme_bw( base_size = 18)+
+  theme( strip.text.y = element_text( angle = 0 ) )
+```
+
+Here we can see that the effect was pushed by the facilitation
+that the single case had in the Left Congruent Foot condition
+compared to the Control Group.
+
+## Conclusions
+
+In this vignette we have seen how to use the package **bmscstan**
+and its functions to analyse and make sense of Single Case data.
+
+The output of the main functions is rich of information, and the 
+Bayesian Inference can be done by taking into account the Savage-Dickey
+$BF_{10}$, or the $95\%$ CI [see @Kruschke2014 for further details].
+
+In this vignette there is almost no discussion concerning how to test the
+Single Case fixed effects (third part of the main output), but it was used
+to better understand what happens in the differences between the 
+single case and the control group.
+
+However, if your hypotheses focus on the behaviour of the patient, and not
+only on the differences between single case and the control group,
+it will be important to analyse in detail also that part.
 
 
 # References

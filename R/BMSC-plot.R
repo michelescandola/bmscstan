@@ -532,8 +532,8 @@ plot.pairwise.BMSC = function(x, type = "interval", CI = 0.95, ...) {
           contrast = rep(deltas.names , each = length(deltas.dist[[1]]))
           )
 
-        betas$name <- ordered(betas$name, level = levels(betas$name)[length(levels(betas$name)):1])
-        deltas$name <- ordered(deltas$contrast, level = levels(deltas$contrast)[length(levels(deltas$contrast)):1])
+        betas$name <- ordered(betas$name, level = unique(betas$name)[length(unique(betas$name)):1])
+        deltas$name <- ordered(deltas$contrast, level = unique(deltas$contrast)[length(unique(deltas$contrast)):1])
 
         dat1 <- betas
         dat2 <- deltas
@@ -549,8 +549,8 @@ plot.pairwise.BMSC = function(x, type = "interval", CI = 0.95, ...) {
       contrast = rep(deltas.names , each = length(deltas.dist[[1]]))
     )
 
-    betas$name <- ordered(betas$name, level = levels(betas$name)[length(levels(betas$name)):1])
-    deltas$name <- ordered(deltas$contrast, level = levels(deltas$contrast)[length(levels(deltas$contrast)):1])
+    betas$name <- ordered(betas$name, level = unique(betas$name)[length(unique(betas$name)):1])
+    deltas$name <- ordered(deltas$contrast, level = unique(deltas$contrast)[length(unique(deltas$contrast)):1])
 
     dat1 <- betas
     dat2 <- deltas

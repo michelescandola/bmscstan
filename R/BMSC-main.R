@@ -13,7 +13,7 @@
 #'
 #' By means of \strong{bmscstan} the effects of the control group and the
 #' effects of the deviance between the
-#' Single Case and the group will be esimated.
+#' Single Case and the group will be estimated.
 #'
 #' The model to estimate the controls parameters is:
 #'
@@ -33,6 +33,9 @@
 #' \ifelse{html}{\out{<center><i>y<sub>pt</sub>~N(&phi; X<sub>pt</sub>, &sigma;<sup>2</sup><sub>pt</<sub>)</i></center>}}{\eqn{y_{pt}~N(\phi X_{pt}, \sigma_{pt}^2)}}
 #'
 #' where \eqn{\phi = \beta + \delta}.
+#'
+#' The validation of the approach can be found here:
+#' https://www.doi.org/10.31234/osf.io/sajdq
 #'
 #' @section Details:
 #' The main function of \strong{bmscstan} is \code{\link{BMSC}}, which uses formula syntax to
