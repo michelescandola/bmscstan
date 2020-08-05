@@ -11,9 +11,7 @@ pairwise.BMSC(mdl, contrast, covariate = NULL, who = "delta")
 
 \item{contrast}{Character value giving the name of the coefficient whose levels need to be compared.}
 
-\item{covariate}{Character value giving the name of a variable with respect to which a difference
-quotient of the linear predictors is computed. In order for this to be useful,
-\code{covariate} should be a numeric predictor that interacts with at least one factor in \code{contrast}.}
+\item{covariate}{at the moment is silent}
 
 \item{who}{parameter to choose the estimates to contrast
 \describe{
