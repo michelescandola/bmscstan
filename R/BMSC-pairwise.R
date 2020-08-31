@@ -14,7 +14,7 @@
 #' }
 #'
 #' @examples
-#'  \dontrun{
+#'  \donttest{
 #'
 #'  data(BSE)
 #'

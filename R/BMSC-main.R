@@ -107,7 +107,7 @@ NULL
 #' @param ... further arguments to be passed to \strong{stan} function.
 #'
 #' @examples
-#'  \dontrun{
+#'  \donttest{
 #'
 #'  data(BSE)
 #'

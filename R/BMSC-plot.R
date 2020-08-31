@@ -13,7 +13,7 @@
 #' @param ... other arguments are ignored.
 #'
 #' @examples
-#'  \dontrun{
+#'  \donttest{
 #' # simulation of healthy controls data
 #'
 #' Sigma.ctrl <- matrix(cbind(1, .7,  .7, 1) ,nrow=2)
@@ -27,7 +27,7 @@
 #' random.normal <- matrix( rnorm( n = ncol(U) * numobs, mean = 3, sd = 1),
 #'                          nrow = ncol(U), ncol = numobs)
 #'
-#' X = U %*% random.normal
+#' X = U \%*\% random.normal
 #'
 #' dat.ctrl <- as.data.frame(t(X))
 #'
@@ -147,7 +147,7 @@ pp_check.BMSC = function(object, type = "dens", limited = FALSE , ...) {
 #' @param ... other arguments are ignored.
 #'
 #' @examples
-#'  \dontrun{
+#'  \donttest{
 #'
 #'  data(BSE)
 #'
@@ -438,7 +438,7 @@ plot.BMSC = function(x, who = "both", type = "interval", CI = 0.95, ...) {
 #' @param ... other arguments are ignored.
 #'
 #' @examples
-#'  \dontrun{
+#'  \donttest{
 #'
 #'  data(BSE)
 #'

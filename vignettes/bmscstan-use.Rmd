@@ -15,7 +15,11 @@ editor_options:
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  eval = nzchar(Sys.getenv("bmscstan_eval"))
 )
 ```
 
@@ -159,7 +163,7 @@ syntax should be straightforward.
 
 In this case, we want to fit the following model:
 
-`RT ~ Body.District * Congruency * Side + (Congruency+* Side | ID / Body.District)`
+`RT ~ Body.District * Congruency * Side + (Congruency * Side | ID / Body.District)`
 
 Unfortunately, `BMSC` does not directly allow the syntax `ID / Body.District`
 in the specification of the random effects.
@@ -177,14 +181,14 @@ data.ctrl$BD_ID <- interaction( data.ctrl$Body.District , data.ctrl$ID )
 
 and the model would be:
 
-`RT ~ Body.District * Congruency * Side + (Congruency + Side | BD_ID) + (Congruency + Side | ID)`
+`RT ~ Body.District * Congruency * Side + (Congruency * Side | BD_ID) + (Congruency * Side | ID)`
 
 ## Fitting the BMSC model
 
 At this point, fitting the model is easy, and it can be done with the use of
 a single function.
 
-```{r}
+```{r, warning = FALSE, message = FALSE}
 mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
              (Congruency * Side | ID) + (Congruency * Side | BD_ID),
              data_ctrl = data.ctrl,
