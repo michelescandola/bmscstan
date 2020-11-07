@@ -19,11 +19,11 @@ summary.BMSC = function(object, ...) {
     }
 
     if (object[[7]] == "normal") {
-        d0 <- dnorm(0, 0, 10)
+        d0 <- dnorm(0, 0, object[[8]])
     } else if (object[[7]] == "cauchy") {
-        d0 <- dcauchy(0, 0, sqrt(2)/2)
+        d0 <- dcauchy(0, 0, object[[8]])
     } else if (object[[7]] == "student") {
-        d0 <- LaplacesDemon::dst(0, 10, 3)
+        d0 <- LaplacesDemon::dst(0, object[[8]], 3)
     }
 
     delta = extract(object[[2]], pars = "b_Delta")
@@ -65,7 +65,7 @@ summary.BMSC = function(object, ...) {
 
     sum05$BF10 <- BF10_pts
 
-    out = list(sum01, sum02, sum03, sum04, object, sum05, object[[7]])
+    out = list(sum01, sum02, sum03, sum04, object, sum05, object[[7]], object[[8]])
 
     class(out) = append(class(out), "summary.BMSC")
 
@@ -86,7 +86,8 @@ print.summary.BMSC = function(x, ...) {
 
     print(x[[5]][[1]], ...)
     cat("\n")
-    print(paste("Prior:", x[[7]]))
+    print(paste0("Priors for the regression coefficients: ", x[[7]],
+                " distribution; Dispersion parameter (scale or sigma): ", x[[8]]))
 
     cat("\n\n  Fixed Effects for the Control Group\n\n")
 

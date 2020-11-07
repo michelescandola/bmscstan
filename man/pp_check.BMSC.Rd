@@ -27,7 +27,7 @@ a ggplot2 object
 \code{pp_check()} plots the posterior predictive check for BMSC objects.
 }
 \examples{
- \dontrun{
+ \donttest{
 # simulation of healthy controls data
 
 Sigma.ctrl <- matrix(cbind(1, .7,  .7, 1) ,nrow=2)
@@ -62,7 +62,7 @@ set.seed(0)
 random.normal <- matrix( rnorm( n = ncol(U) * numobs, mean = 3, sd = 1),
                  nrow = ncol(U), ncol = numobs)
 
-X = U \\%*\\% random.normal
+X = U \%*\% random.normal
 
 dat.pt <- as.data.frame(t(X))
 
@@ -72,7 +72,7 @@ cor(dat.pt)
 
 # fit the single case model
 
-mdl.reg <- BMSC(y ~ x, data_ctrl = dat.ctrl, data_pt = dat.pt, seed = 10)
+mdl.reg <- BMSC(y ~ x, data_ctrl = dat.ctrl, data_sc = dat.pt, seed = 10)
 
 # summarize the data
 

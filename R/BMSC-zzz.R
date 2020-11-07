@@ -6,7 +6,7 @@
   suppressWarnings(logspline::dlogspline(d,x))
 }
 
-.building.model <- function(ran.matrices=NULL,typeprior){
+.building.model <- function(ran.matrices=NULL,typeprior,s){
   code.data <- "
   data {
     int<lower=1> Obs_Controls; // the total number of observations in the control group
@@ -15,7 +15,8 @@
     real y_Ctrl[Obs_Controls];                  // the dependent variable for the control group
     real y_Pts[Obs_Patients];                   // the patient d.v.
     matrix[Obs_Controls,Nparameters] XF_Ctrl;   // the control matrix
-    matrix[Obs_Patients,Nparameters] XF_Pts;    // the patient matrix"
+    matrix[Obs_Patients,Nparameters] XF_Pts;    // the patient matrix
+    real s;                    // the dispersion parameter for priors"
 
   code.parameter <-   "parameters {
     vector[Nparameters] b_Ctrl;             //the regression parameters for controls
@@ -42,8 +43,8 @@
       target += cauchy_lpdf(sigmaC|0,1000);
       target += cauchy_lpdf(sigmaP|0,1000);
 
-      target += normal_lpdf(b_Ctrl  | 0, 10);
-      target += normal_lpdf(b_Delta | 0, 10);
+      target += normal_lpdf(b_Ctrl  | 0, s);
+      target += normal_lpdf(b_Delta | 0, s);
 
       target += normal_lpdf(y_Pts|mu_Pts,sigmaP);
       target += normal_lpdf(y_Ctrl|mu_Ctrl,sigmaC);
@@ -54,8 +55,8 @@
       target += cauchy_lpdf(sigmaC|0,1000);
       target += cauchy_lpdf(sigmaP|0,1000);
 
-      target += cauchy_lpdf(b_Ctrl  | 0, sqrt(2)/2);
-      target += cauchy_lpdf(b_Delta | 0, sqrt(2)/2);
+      target += cauchy_lpdf(b_Ctrl  | 0, s);
+      target += cauchy_lpdf(b_Delta | 0, s);
 
       target += normal_lpdf(y_Pts|mu_Pts,sigmaP);
       target += normal_lpdf(y_Ctrl|mu_Ctrl,sigmaC);
@@ -66,8 +67,8 @@
       target += cauchy_lpdf(sigmaC|0,1000);
       target += cauchy_lpdf(sigmaP|0,1000);
 
-      target += student_t_lpdf(b_Ctrl  | 3, 0, 10);
-      target += student_t_lpdf(b_Delta | 3, 0, 10);
+      target += student_t_lpdf(b_Ctrl  | 3, 0, s);
+      target += student_t_lpdf(b_Delta | 3, 0, s);
 
       target += normal_lpdf(y_Pts|mu_Pts,sigmaP);
       target += normal_lpdf(y_Ctrl|mu_Ctrl,sigmaC);
@@ -164,7 +165,7 @@
 
 .building.data.list <- function(ran.matrices = NULL, grouping,
                                 matrix.fix.ctrl, matrix.fix.pt,
-                                data_ctrl, data_sc, formula){
+                                data_ctrl, data_sc, formula,s){
   data.list <- list(
     Nparameters = ncol(matrix.fix.ctrl),
 
@@ -175,7 +176,9 @@
     XF_Pts =matrix.fix.pt,
 
     Obs_Controls = nrow(matrix.fix.ctrl),
-    Obs_Patients = nrow(matrix.fix.pt)
+    Obs_Patients = nrow(matrix.fix.pt),
+
+    s = s
   )
 
   if(!is.null(ran.matrices)){

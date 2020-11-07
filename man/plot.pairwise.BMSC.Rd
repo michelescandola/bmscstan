@@ -27,44 +27,103 @@ a list of two ggplot2 objects
 Plot estimates from a \code{pairwise.BMSC} object.
 }
 \examples{
- \dontrun{
+ \donttest{
 
- data(BSE)
+######################################
+# simulation of controls' group data
+######################################
 
- # Normal regression of data coming from a body representation paradigm
- # with a control sample of 12 participants and one patient with
- # unilateral brachial plexus lesion
- mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
-             (Body.District + Congruency + Side | ID),
-             data_ctrl = data.ctrl,
-             data_pt = data.pt,
-             cores = 4)
+# Number of levels for each condition and trials
+NCond1  <- 2
+NCond2  <- 2
+Ntrials <- 8
+NSubjs  <- 30
 
- # generate a summary of the results
- summary(mdl)
+betas <- c( 0 , 0 , 0 ,  0.2)
 
- # posterior predictive p-value checking
- pp_check(mdl, limited = FALSE)
+data.sim <- expand.grid(
+  trial      = 1:Ntrials,
+  ID         = factor(1:NSubjs),
+  Cond1      = factor(1:NCond1),
+  Cond2      = factor(1:NCond2)
+)
 
- # plot of the results
- plot(mdl)
+contrasts(data.sim$Cond1) <- contr.sum(2)
+contrasts(data.sim$Cond2) <- contr.sum(2)
 
- # compute pairwise contrasts
- ph <- pairwise(mdl , contrast = "Body.District1:Side1")
+### d.v. generation
+y <- rep( times = nrow(data.sim) , NA )
 
- ph
+# cheap simulation of individual random intercepts
+set.seed(1)
+rsubj <- rnorm(NSubjs , sd = 0.1)
 
- # plot pairwise comparisons
+for( i in 1:length( levels( data.sim$ID ) ) ){
 
- plot(ph)
+  sel <- which( data.sim$ID == as.character(i) )
 
- plot(ph , type = "area")
+  mm  <- model.matrix(~ Cond1 * Cond2 , data = data.sim[ sel , ] )
 
- # customization of pairiwse comparisons plot
+  set.seed(1 + i)
+  y[sel] <- mm \%*\% as.matrix(betas + rsubj[i]) +
+    rnorm( n = Ntrials * NCond1 * NCond2 )
 
- plot(ph)[[1]]+theme_bw(base_size = 18)
+}
 
- plot(ph , type = "area")[[1]]+theme_bw(base_size = 18)+
+data.sim$y <- y
+
+# just checking the simulated data...
+boxplot(y~Cond1*Cond2, data = data.sim)
+
+######################################
+# simulation of patient data
+######################################
+
+betas.pt <- c( 0 , 0.8 , 0 ,  0)
+
+data.pt <- expand.grid(
+  trial      = 1:Ntrials,
+  Cond1      = factor(1:NCond1),
+  Cond2      = factor(1:NCond2)
+)
+
+contrasts(data.pt$Cond1) <- contr.sum(2)
+contrasts(data.pt$Cond2) <- contr.sum(2)
+
+### d.v. generation
+mm  <- model.matrix(~ Cond1 * Cond2 , data = data.pt )
+
+set.seed(5)
+data.pt$y <- (mm \%*\% as.matrix(betas.pt) +
+                rnorm( n = Ntrials * NCond1 * NCond2 ))[,1]
+
+# just checking the simulated data...
+boxplot(y~Cond1*Cond2, data = data.pt)
+
+mdl <- BMSC(y ~ Cond1 * Cond2 + ( 1 | ID ),
+            data_ctrl = data.sim, data_sc = data.pt, seed = 77,
+            typeprior = "cauchy", s = 1)
+
+summary(mdl)
+
+pp_check(mdl)
+
+# compute pairwise contrasts
+ph <- pairwise.BMSC( mdl, contrast = "Cond11:Cond21")
+
+ph
+
+# plot pairwise comparisons
+
+plot(ph)
+
+plot(ph , type = "area")
+
+# customization of pairiwse comparisons plot
+
+plot(ph)[[1]]+theme_bw(base_size = 18)
+
+plot(ph , type = "area")[[1]]+theme_bw(base_size = 18)+
    theme(strip.text.y = element_text( angle = 0))
 }
 

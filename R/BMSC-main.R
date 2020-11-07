@@ -100,34 +100,25 @@ NULL
 #' @param typeprior Set the desired prior distribution for the fixed effects.
 #' \describe{
 #' \item{normal}{a normal distribution with \eqn{\mu = 0} and \eqn{\sigma = 10}}
-#' \item{cauchy}{a cauchy distribution with \eqn{\mu = 0} and scale \eqn{\sqrt{2}/2}}
-#' \item{student}{a Student's T distribution, with \eqn{\mu = 0}, \eqn{\nu = 3} and \eqn{\sigma = 10}}
+#' \item{cauchy}{a cauchy distribution with \eqn{\mu = 0} and scale
+#' \eqn{\sqrt{2}/2}}
+#' \item{student}{a Student's T distribution, with \eqn{\mu = 0}, \eqn{\nu = 3}
+#' and \eqn{\sigma = 10}}
 #' }
 #' The normal distribution is the default.
+#'
+#' The \eqn{\sigma} or scale parameters of the prior distributions can be
+#' modified by setting the dispersion parameter \code{s}.
+#' @param s is the dispersion parameter (standard deviation or scale) for the
+#' prior distribution.
+#'
+#' If NULL (the default) and \code{typeprior = "normal"} or
+#' \code{typeprior = "student"} \code{s = 10}, otherwise, if
+#' \code{typeprior = "cauchy"} \code{s = sqrt(2)/2}.
 #' @param ... further arguments to be passed to \strong{stan} function.
 #'
 #' @examples
 #'  \donttest{
-#'
-#'  data(BSE)
-#'
-#' # Linear regression of data coming from a body representation paradigm
-#' # with a control sample of 12 participants and one patient with
-#' # unilateral brachial plexus lesion
-#' mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
-#'             (Body.District + Congruency + Side | ID),
-#'             data_ctrl = data.ctrl,
-#'             data_sc = data.pt,
-#'             cores = 4)
-#'
-#'  # generate a summary of the results
-#'  summary(mdl)
-#'
-#'  # posterior predictive p-value checking
-#'  pp_check(mdl, limited = FALSE)
-#'
-#'  # plot of the results
-#'  plot(mdl)
 #'
 #' # simulation of healthy controls data
 #'
@@ -175,9 +166,17 @@ NULL
 #'
 #' mdl.reg <- BMSC(y ~ x, data_ctrl = dat.ctrl, data_sc = dat.pt, seed = 10)
 #'
-#' # summarize the data
+#' # posterior-predictive check of the model
+#'
+#' pp_check(mdl.reg)
+#'
+#' # summarize the results
 #'
 #' summary(mdl.reg)
+#'
+#' # plot the results
+#'
+#' plot(mdl.reg)
 #' }
 #'
 #' @return a \code{BMSC} object
@@ -186,7 +185,12 @@ NULL
 BMSC <- function(formula, data_ctrl, data_sc,
                 cores = 1, chains = 4, warmup = 2000,
                 iter = 4000, seed = NA, typeprior = "normal",
-                ...){
+                s, ...){
+
+  if(missing(s)){
+    s <- 10
+    if(typeprior == "cauchy") s <- sqrt(2)/2
+  }
 
   mypaste <- function(x){
     out <- NULL
@@ -226,16 +230,16 @@ BMSC <- function(formula, data_ctrl, data_sc,
     ran.matrices[[ran]] <- model.matrix(as.formula(paste0(" ~",mypaste(tmp[1]))),data_ctrl)
   }
 
-  stancode <- .building.model(ran.matrices,typeprior)
+  stancode <- .building.model(ran.matrices,typeprior,s)
 
   datalist <- .building.data.list(ran.matrices,grouping,matrix.fix.ctrl,
-                                 matrix.fix.pt,data_ctrl,data_sc,formula)
+                                 matrix.fix.pt,data_ctrl,data_sc,formula,s)
 
   mdl <- suppressMessages(stan(model_code = stancode, data = datalist, iter = iter,
              chains = chains,cores = cores, warmup = warmup,
              seed = seed, ...))
 
-  out <- list(formula,mdl,data_sc,data_ctrl,datalist,stancode,typeprior)
+  out <- list(formula,mdl,data_sc,data_ctrl,datalist,stancode,typeprior,s)
 
   class(out) <- append(class(out),"BMSC")
 

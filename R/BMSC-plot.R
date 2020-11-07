@@ -27,7 +27,7 @@
 #' random.normal <- matrix( rnorm( n = ncol(U) * numobs, mean = 3, sd = 1),
 #'                          nrow = ncol(U), ncol = numobs)
 #'
-#' X = U \%*\% random.normal
+#' X = U %*% random.normal
 #'
 #' dat.ctrl <- as.data.frame(t(X))
 #'
@@ -48,7 +48,7 @@
 #' random.normal <- matrix( rnorm( n = ncol(U) * numobs, mean = 3, sd = 1),
 #'                  nrow = ncol(U), ncol = numobs)
 #'
-#' X = U \%*\% random.normal
+#' X = U %*% random.normal
 #'
 #' dat.pt <- as.data.frame(t(X))
 #'
@@ -58,7 +58,7 @@
 #'
 #' # fit the single case model
 #'
-#' mdl.reg <- BMSC(y ~ x, data_ctrl = dat.ctrl, data_pt = dat.pt, seed = 10)
+#' mdl.reg <- BMSC(y ~ x, data_ctrl = dat.ctrl, data_sc = dat.pt, seed = 10)
 #'
 #' # summarize the data
 #'
@@ -149,26 +149,6 @@ pp_check.BMSC = function(object, type = "dens", limited = FALSE , ...) {
 #' @examples
 #'  \donttest{
 #'
-#'  data(BSE)
-#'
-#'  # Normal robust regression of data coming from a body representation paradigm
-#'  # with a control sample of 12 participants and one patient with
-#'  # unilateral brachial plexus lesion
-#'  mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
-#'              (Body.District + Congruency + Side | ID),
-#'              data_ctrl = data.ctrl,
-#'              data_pt = data.pt,
-#'              cores = 4)
-#'
-#'  # generate a summary of the results
-#'  summary(mdl)
-#'
-#'  # posterior predictive p-value checking
-#'  pp_check(mdl, limited = FALSE)
-#'
-#'  # plot of the results
-#'  plot(mdl)
-#'
 #' # simulation of healthy controls data
 #'
 #' Sigma.ctrl <- matrix(cbind(1, .7,  .7, 1) ,nrow=2)
@@ -213,7 +193,7 @@ pp_check.BMSC = function(object, type = "dens", limited = FALSE , ...) {
 #'
 #' # fit the single case model
 #'
-#' mdl.reg <- BMSC(y ~ x, data_ctrl = dat.ctrl, data_pt = dat.pt, seed = 10)
+#' mdl.reg <- BMSC(y ~ x, data_ctrl = dat.ctrl, data_sc = dat.pt, seed = 10)
 #'
 #' # summarize the data
 #'
@@ -440,42 +420,101 @@ plot.BMSC = function(x, who = "both", type = "interval", CI = 0.95, ...) {
 #' @examples
 #'  \donttest{
 #'
-#'  data(BSE)
+#' ######################################
+#' # simulation of controls' group data
+#' ######################################
 #'
-#'  # Normal regression of data coming from a body representation paradigm
-#'  # with a control sample of 12 participants and one patient with
-#'  # unilateral brachial plexus lesion
-#'  mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
-#'              (Body.District + Congruency + Side | ID),
-#'              data_ctrl = data.ctrl,
-#'              data_pt = data.pt,
-#'              cores = 4)
+#' # Number of levels for each condition and trials
+#' NCond1  <- 2
+#' NCond2  <- 2
+#' Ntrials <- 8
+#' NSubjs  <- 30
 #'
-#'  # generate a summary of the results
-#'  summary(mdl)
+#' betas <- c( 0 , 0 , 0 ,  0.2)
 #'
-#'  # posterior predictive p-value checking
-#'  pp_check(mdl, limited = FALSE)
+#' data.sim <- expand.grid(
+#'   trial      = 1:Ntrials,
+#'   ID         = factor(1:NSubjs),
+#'   Cond1      = factor(1:NCond1),
+#'   Cond2      = factor(1:NCond2)
+#' )
 #'
-#'  # plot of the results
-#'  plot(mdl)
+#' contrasts(data.sim$Cond1) <- contr.sum(2)
+#' contrasts(data.sim$Cond2) <- contr.sum(2)
 #'
-#'  # compute pairwise contrasts
-#'  ph <- pairwise(mdl , contrast = "Body.District1:Side1")
+#' ### d.v. generation
+#' y <- rep( times = nrow(data.sim) , NA )
 #'
-#'  ph
+#' # cheap simulation of individual random intercepts
+#' set.seed(1)
+#' rsubj <- rnorm(NSubjs , sd = 0.1)
 #'
-#'  # plot pairwise comparisons
+#' for( i in 1:length( levels( data.sim$ID ) ) ){
 #'
-#'  plot(ph)
+#'   sel <- which( data.sim$ID == as.character(i) )
 #'
-#'  plot(ph , type = "area")
+#'   mm  <- model.matrix(~ Cond1 * Cond2 , data = data.sim[ sel , ] )
 #'
-#'  # customization of pairiwse comparisons plot
+#'   set.seed(1 + i)
+#'   y[sel] <- mm %*% as.matrix(betas + rsubj[i]) +
+#'     rnorm( n = Ntrials * NCond1 * NCond2 )
 #'
-#'  plot(ph)[[1]]+theme_bw(base_size = 18)
+#' }
 #'
-#'  plot(ph , type = "area")[[1]]+theme_bw(base_size = 18)+
+#' data.sim$y <- y
+#'
+#' # just checking the simulated data...
+#' boxplot(y~Cond1*Cond2, data = data.sim)
+#'
+#' ######################################
+#' # simulation of patient data
+#' ######################################
+#'
+#' betas.pt <- c( 0 , 0.8 , 0 ,  0)
+#'
+#' data.pt <- expand.grid(
+#'   trial      = 1:Ntrials,
+#'   Cond1      = factor(1:NCond1),
+#'   Cond2      = factor(1:NCond2)
+#' )
+#'
+#' contrasts(data.pt$Cond1) <- contr.sum(2)
+#' contrasts(data.pt$Cond2) <- contr.sum(2)
+#'
+#' ### d.v. generation
+#' mm  <- model.matrix(~ Cond1 * Cond2 , data = data.pt )
+#'
+#' set.seed(5)
+#' data.pt$y <- (mm %*% as.matrix(betas.pt) +
+#'                 rnorm( n = Ntrials * NCond1 * NCond2 ))[,1]
+#'
+#' # just checking the simulated data...
+#' boxplot(y~Cond1*Cond2, data = data.pt)
+#'
+#' mdl <- BMSC(y ~ Cond1 * Cond2 + ( 1 | ID ),
+#'             data_ctrl = data.sim, data_sc = data.pt, seed = 77,
+#'             typeprior = "cauchy", s = 1)
+#'
+#' summary(mdl)
+#'
+#' pp_check(mdl)
+#'
+#' # compute pairwise contrasts
+#' ph <- pairwise.BMSC( mdl, contrast = "Cond11:Cond21")
+#'
+#' ph
+#'
+#' # plot pairwise comparisons
+#'
+#' plot(ph)
+#'
+#' plot(ph , type = "area")
+#'
+#' # customization of pairiwse comparisons plot
+#'
+#' plot(ph)[[1]]+theme_bw(base_size = 18)
+#'
+#' plot(ph , type = "area")[[1]]+theme_bw(base_size = 18)+
 #'    theme(strip.text.y = element_text( angle = 0))
 #' }
 #'

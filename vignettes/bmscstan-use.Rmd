@@ -193,7 +193,7 @@ mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
              (Congruency * Side | ID) + (Congruency * Side | BD_ID),
              data_ctrl = data.ctrl,
              data_sc = data.pt,
-             cores = 4,
+             cores = 1,
              seed = 2020)
 ```
 
