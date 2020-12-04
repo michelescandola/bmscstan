@@ -115,6 +115,18 @@ NULL
 #' If NULL (the default) and \code{typeprior = "normal"} or
 #' \code{typeprior = "student"} \code{s = 10}, otherwise, if
 #' \code{typeprior = "cauchy"} \code{s = sqrt(2)/2}.
+#'
+#' @param family a description of the response distribution to be used in
+#' this model.
+#' This is a character string naming the family.
+#' By default, a linear gaussian model is applied.
+#' \describe{
+#' \item{gaussian}{the dependent variable is distributed along a Gaussian distribution,
+#' with \code{identity} link function}
+#' \item{binomial}{the dependent variable is distributed along a Binomial distribution,
+#' with \code{logit} link function}
+#' }
+#'
 #' @param ... further arguments to be passed to \strong{stan} function.
 #'
 #' @examples
@@ -185,8 +197,8 @@ NULL
 BMSC <- function(formula, data_ctrl, data_sc,
                 cores = 1, chains = 4, warmup = 2000,
                 iter = 4000, seed = NA, typeprior = "normal",
-                s, ...){
-
+                s, family = "gaussian", ...){
+  ## default s value
   if(missing(s)){
     s <- 10
     if(typeprior == "cauchy") s <- sqrt(2)/2
@@ -206,6 +218,8 @@ BMSC <- function(formula, data_ctrl, data_sc,
   if(missing(data_sc)) stop("the dataframe \"data_sc\" is not specified")
   if(typeprior!="normal"&&typeprior!="cauchy"&&typeprior!="student")
       stop("Not a valid typeprior")
+  if(family!="gaussian"&&family!="binomial")
+    stop("Not a valid family (only gaussian and binomial are supported)")
 
   # extract formula's terms
   form.terms      <- attributes(terms(formula))$term.labels
@@ -230,16 +244,26 @@ BMSC <- function(formula, data_ctrl, data_sc,
     ran.matrices[[ran]] <- model.matrix(as.formula(paste0(" ~",mypaste(tmp[1]))),data_ctrl)
   }
 
-  stancode <- .building.model(ran.matrices,typeprior,s)
+  stancode <- .building.model(ran.matrices,typeprior,s,family)
 
   datalist <- .building.data.list(ran.matrices,grouping,matrix.fix.ctrl,
-                                 matrix.fix.pt,data_ctrl,data_sc,formula,s)
+                                 matrix.fix.pt,data_ctrl,data_sc,formula,
+                                 s, family)
 
   mdl <- suppressMessages(stan(model_code = stancode, data = datalist, iter = iter,
              chains = chains,cores = cores, warmup = warmup,
              seed = seed, ...))
 
-  out <- list(formula,mdl,data_sc,data_ctrl,datalist,stancode,typeprior,s)
+  out <- list(formula,mdl,data_sc,data_ctrl,datalist,stancode,typeprior,s,family)
+  # 1. formula
+  # 2. mdl
+  # 3. data single case
+  # 4. data controls
+  # 5. list of data for bayesian model
+  # 6. stan code
+  # 7. type of prior
+  # 8. scale s
+  # 9. d.v. family
 
   class(out) <- append(class(out),"BMSC")
 

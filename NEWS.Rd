@@ -2,6 +2,12 @@
 \title{bmscstan News}
 \encoding{UTF-8}
 
+\section{Version 1.1.1}{
+  \itemize{
+    \item solved small bugs in pairwise.BMSC
+  }
+}
+
 \section{Version 1.1.0}{
   \itemize{
     \item added dispersion parameter "s" to \code{BMSC} function.

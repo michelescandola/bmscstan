@@ -6,87 +6,171 @@
   suppressWarnings(logspline::dlogspline(d,x))
 }
 
-.building.model <- function(ran.matrices=NULL,typeprior,s){
-  code.data <- "
-  data {
-    int<lower=1> Obs_Controls; // the total number of observations in the control group
-    int<lower=1> Obs_Patients; // the total numebr of observation in the patient
-    int<lower=1> Nparameters;  // the total number of parameters for the independent variables
-    real y_Ctrl[Obs_Controls];                  // the dependent variable for the control group
-    real y_Pts[Obs_Patients];                   // the patient d.v.
-    matrix[Obs_Controls,Nparameters] XF_Ctrl;   // the control matrix
-    matrix[Obs_Patients,Nparameters] XF_Pts;    // the patient matrix
-    real s;                    // the dispersion parameter for priors"
+.building.model <- function(ran.matrices=NULL,typeprior,s,family){
+  if(family == "gaussian"){
+    code.data <- "
+    data {
+      int<lower=1> Obs_Controls; // the total number of observations in the control group
+      int<lower=1> Obs_Patients; // the total numebr of observation in the patient
+      int<lower=1> Nparameters;  // the total number of parameters for the independent variables
+      real y_Ctrl[Obs_Controls];                  // the dependent variable for the control group
+      real y_Pts[Obs_Patients];                   // the patient d.v.
+      matrix[Obs_Controls,Nparameters] XF_Ctrl;   // the control matrix
+      matrix[Obs_Patients,Nparameters] XF_Pts;    // the patient matrix
+      real s;                    // the dispersion parameter for priors"
 
-  code.parameter <-   "parameters {
-    vector[Nparameters] b_Ctrl;             //the regression parameters for controls
-    vector[Nparameters] b_Delta;            //the regression parameters for the controls - patients difference
-    real<lower=0> sigmaC;                    //the standard deviation for controls
-    real<lower=0> sigmaP;                    //the standard deviation for patient"
+    code.parameter <-   "parameters {
+      vector[Nparameters] b_Ctrl;             //the regression parameters for controls
+      vector[Nparameters] b_Delta;            //the regression parameters for the controls - patients difference
+      real<lower=0> sigmaC;                    //the standard deviation for controls
+      real<lower=0> sigmaP;                    //the standard deviation for patient"
 
-  code.transformed.parameter <-   "transformed parameters{
-    real mu_Pts[Obs_Patients];
-    real mu_Ctrl[Obs_Controls];"
+    code.transformed.parameter <-   "transformed parameters{
+      real mu_Pts[Obs_Patients];
+      real mu_Ctrl[Obs_Controls];"
 
-  code.transformed.parameter2 <- ""
+    code.transformed.parameter2 <- ""
 
-  last.string.code.transformed.parameter <- "
+    last.string.code.transformed.parameter <- "
 
-    for(i in 1:Obs_Patients){
-      mu_Pts[i] = dot_product(b_Ctrl+b_Delta,XF_Pts[i,]);
+      for(i in 1:Obs_Patients){
+        mu_Pts[i] = dot_product(b_Ctrl+b_Delta,XF_Pts[i,]);
+      }
+      for(i in 1:Obs_Controls){
+        mu_Ctrl[i] = dot_product(b_Ctrl,XF_Ctrl[i,])"
+    if(typeprior=="normal"){
+      code.model <-   "
+
+        target += cauchy_lpdf(sigmaC|0,1000);
+        target += cauchy_lpdf(sigmaP|0,1000);
+
+        target += normal_lpdf(b_Ctrl  | 0, s);
+        target += normal_lpdf(b_Delta | 0, s);
+
+        target += normal_lpdf(y_Pts|mu_Pts,sigmaP);
+        target += normal_lpdf(y_Ctrl|mu_Ctrl,sigmaC);
+      }"
+    }else if(typeprior=="cauchy"){
+      code.model <-   "
+
+        target += cauchy_lpdf(sigmaC|0,1000);
+        target += cauchy_lpdf(sigmaP|0,1000);
+
+        target += cauchy_lpdf(b_Ctrl  | 0, s);
+        target += cauchy_lpdf(b_Delta | 0, s);
+
+        target += normal_lpdf(y_Pts|mu_Pts,sigmaP);
+        target += normal_lpdf(y_Ctrl|mu_Ctrl,sigmaC);
+      }"
+    }else if(typeprior=="student"){
+      code.model <-   "
+
+        target += cauchy_lpdf(sigmaC|0,1000);
+        target += cauchy_lpdf(sigmaP|0,1000);
+
+        target += student_t_lpdf(b_Ctrl  | 3, 0, s);
+        target += student_t_lpdf(b_Delta | 3, 0, s);
+
+        target += normal_lpdf(y_Pts|mu_Pts,sigmaP);
+        target += normal_lpdf(y_Ctrl|mu_Ctrl,sigmaC);
+      }"
     }
-    for(i in 1:Obs_Controls){
-      mu_Ctrl[i] = dot_product(b_Ctrl,XF_Ctrl[i,])"
-  if(typeprior=="normal"){
-    code.model <-   "
 
-      target += cauchy_lpdf(sigmaC|0,1000);
-      target += cauchy_lpdf(sigmaP|0,1000);
+    code.generated.quantities <-   "generated quantities {
+      real y_pt_rep[Obs_Patients];
+      real y_ct_rep[Obs_Controls];
 
-      target += normal_lpdf(b_Ctrl  | 0, s);
-      target += normal_lpdf(b_Delta | 0, s);
-
-      target += normal_lpdf(y_Pts|mu_Pts,sigmaP);
-      target += normal_lpdf(y_Ctrl|mu_Ctrl,sigmaC);
+      for(i in 1:Obs_Patients){
+        y_pt_rep[i] = normal_rng(mu_Pts[i], sigmaP);
+      }
+      for(i in 1:Obs_Controls){
+        y_ct_rep[i] = normal_rng(mu_Ctrl[i], sigmaC);
+      }
     }"
-  }else if(typeprior=="cauchy"){
-    code.model <-   "
+  } else if (family == "binomial"){
+    code.data <- "
+    data {
+      int<lower=1> Obs_Controls; // the total number of observations in the control group
+      int<lower=1> Obs_Patients; // the total numebr of observation in the patient
+      int<lower=1> Nparameters;  // the total number of parameters for the independent variables
+      integer y_Ctrl[Obs_Controls];                  // the dependent variable for the control group
+      integer y_Pts[Obs_Patients];                   // the patient d.v.
+      integer n_Ctrl[Obs_Controls];
+      integer n_Pts[Obs_Patients];
+      matrix[Obs_Controls,Nparameters] XF_Ctrl;   // the control matrix
+      matrix[Obs_Patients,Nparameters] XF_Pts;    // the patient matrix
+      real s;                    // the dispersion parameter for priors"
 
-      target += cauchy_lpdf(sigmaC|0,1000);
-      target += cauchy_lpdf(sigmaP|0,1000);
+    code.parameter <-   "parameters {
+      vector[Nparameters] b_Ctrl;             //the regression parameters for controls
+      vector[Nparameters] b_Delta;            //the regression parameters for the controls - patients difference"
 
-      target += cauchy_lpdf(b_Ctrl  | 0, s);
-      target += cauchy_lpdf(b_Delta | 0, s);
+    code.transformed.parameter <-   "transformed parameters{
+      real mu_Pts[Obs_Patients];
+      real mu_Ctrl[Obs_Controls];"
 
-      target += normal_lpdf(y_Pts|mu_Pts,sigmaP);
-      target += normal_lpdf(y_Ctrl|mu_Ctrl,sigmaC);
-    }"
-  }else if(typeprior=="student"){
-    code.model <-   "
+    code.transformed.parameter2 <- ""
 
-      target += cauchy_lpdf(sigmaC|0,1000);
-      target += cauchy_lpdf(sigmaP|0,1000);
+    last.string.code.transformed.parameter <- "
 
-      target += student_t_lpdf(b_Ctrl  | 3, 0, s);
-      target += student_t_lpdf(b_Delta | 3, 0, s);
+      for(i in 1:Obs_Patients){
+        mu_Pts[i] = dot_product(b_Ctrl+b_Delta,XF_Pts[i,]);
+      }
+      for(i in 1:Obs_Controls){
+        mu_Ctrl[i] = dot_product(b_Ctrl,XF_Ctrl[i,])"
+    if(typeprior=="normal"){
+      code.model <-   "
 
-      target += normal_lpdf(y_Pts|mu_Pts,sigmaP);
-      target += normal_lpdf(y_Ctrl|mu_Ctrl,sigmaC);
+        target += cauchy_lpdf(sigmaC|0,1000);
+        target += cauchy_lpdf(sigmaP|0,1000);
+
+        target += normal_lpdf(b_Ctrl  | 0, s);
+        target += normal_lpdf(b_Delta | 0, s);
+
+        target += binomial_logit_lpmf(y_Pts|n_Pts,mu_Pts);
+        target += binomial_logit_lpmf(y_Ctrl|n_Ctrl,mu_Ctrl);
+      }"
+    }else if(typeprior=="cauchy"){
+      code.model <-   "
+
+        target += cauchy_lpdf(sigmaC|0,1000);
+        target += cauchy_lpdf(sigmaP|0,1000);
+
+        target += cauchy_lpdf(b_Ctrl  | 0, s);
+        target += cauchy_lpdf(b_Delta | 0, s);
+
+        target += binomial_logit_lpmf(y_Pts|n_Pts,mu_Pts);
+        target += binomial_logit_lpmf(y_Ctrl|n_Ctrl,mu_Ctrl);
+      }"
+    }else if(typeprior=="student"){
+      code.model <-   "
+
+        target += cauchy_lpdf(sigmaC|0,1000);
+        target += cauchy_lpdf(sigmaP|0,1000);
+
+        target += student_t_lpdf(b_Ctrl  | 3, 0, s);
+        target += student_t_lpdf(b_Delta | 3, 0, s);
+
+        target += binomial_logit_lpmf(y_Pts|n_Pts,mu_Pts);
+        target += binomial_logit_lpmf(y_Ctrl|n_Ctrl,mu_Ctrl);
+      }"
+    }
+
+    code.generated.quantities <-   "generated quantities {
+      integer y_pt_rep[Obs_Patients];
+      integer y_ct_rep[Obs_Controls];
+      real tmp;
+
+      for(i in 1:Obs_Patients){
+        tmp = inv_logit(mu_Pts[i]);
+        y_pt_rep[i] = binomial_rng(n_Pts[i], tmp);
+      }
+      for(i in 1:Obs_Controls){
+        tmp = inv_logit(mu_Ctrl[i]);
+        y_ct_rep[i] = binomial_rng(n_Ctrl[i], tmp);
+      }
     }"
   }
-
-  code.generated.quantities <-   "generated quantities {
-    real y_pt_rep[Obs_Patients];
-    real y_ct_rep[Obs_Controls];
-
-    for(i in 1:Obs_Patients){
-      y_pt_rep[i] = normal_rng(mu_Pts[i], sigmaP);
-    }
-    for(i in 1:Obs_Controls){
-      y_ct_rep[i] = normal_rng(mu_Ctrl[i], sigmaC);
-    }
-  }"
-
 
   if(!is.null(ran.matrices)){
     ir <- 1
@@ -165,21 +249,50 @@
 
 .building.data.list <- function(ran.matrices = NULL, grouping,
                                 matrix.fix.ctrl, matrix.fix.pt,
-                                data_ctrl, data_sc, formula,s){
-  data.list <- list(
-    Nparameters = ncol(matrix.fix.ctrl),
+                                data_ctrl, data_sc, formula, s,
+                                family){
 
-    y_Ctrl=data_ctrl[,as.character(formula[2])],
-    y_Pts =data_sc[,as.character(formula[2])],
+  if(family == "gaussian"){
+    data.list <- list(
+      Nparameters = ncol(matrix.fix.ctrl),
 
-    XF_Ctrl=matrix.fix.ctrl,
-    XF_Pts =matrix.fix.pt,
+      y_Ctrl=data_ctrl[,as.character(formula[2])],
+      y_Pts =data_sc[,as.character(formula[2])],
 
-    Obs_Controls = nrow(matrix.fix.ctrl),
-    Obs_Patients = nrow(matrix.fix.pt),
+      XF_Ctrl=matrix.fix.ctrl,
+      XF_Pts =matrix.fix.pt,
 
-    s = s
-  )
+      Obs_Controls = nrow(matrix.fix.ctrl),
+      Obs_Patients = nrow(matrix.fix.pt),
+
+      s = s
+    )
+  } else if(family == "binomial"){
+    dv = as.character(formula[2])
+    dv = gsub("cbind\\(","",dv1)
+    dv = gsub("\\)","",dv1)
+    dv1 = unlist(strsplit(dv,","))[1]
+    dv2 = trimws(unlist(strsplit(dv,","))[2])
+
+    data.list <- list(
+      Nparameters = ncol(matrix.fix.ctrl),
+
+      y_Ctrl=data_ctrl[,dv1],
+      y_Pts =data_sc[,dv1],
+
+      n_Ctrl=data_ctrl[,dv2],
+      n_Pts =data_sc[,dv2],
+
+      XF_Ctrl=matrix.fix.ctrl,
+      XF_Pts =matrix.fix.pt,
+
+      Obs_Controls = nrow(matrix.fix.ctrl),
+      Obs_Patients = nrow(matrix.fix.pt),
+
+      s = s
+    )
+  }
+
 
   if(!is.null(ran.matrices)){
     ir <- 1

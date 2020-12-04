@@ -1,9 +1,9 @@
 Package: bmscstan
 Type: Package
 Title: Bayesian Multilevel Single Case Models using 'Stan'
-Version: 1.1.0
+Version: 1.1.1.9999
 Authors@R: person("Michele", "Scandola", email = "michele.scandola@univr.it",
-                  role = c("aut", "cre"))
+                  role = c("aut", "cre"), comment = c(ORCID = "0000-0003-0853-8975"))
 Description: Analyse single case analyses against a control group.
     Its purpose is to provide a flexible, with good power and
     low first type error

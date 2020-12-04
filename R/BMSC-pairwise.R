@@ -132,15 +132,15 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
   }
 
   se <- function(object) {
-    sd(object)/sqrt(length(object))
+    sd(object)/sqrt(length(object)-1)
   }
 
   if (mdl[[7]] == "normal") {
-    d0 <- dnorm(0, 0, 10)
+    d0 <- dnorm(0, 0, mdl[[8]])
   } else if (mdl[[7]] == "cauchy") {
-    d0 <- dcauchy(0, 0, sqrt(2)/2)
+    d0 <- dcauchy(0, 0, mdl[[8]])
   } else if (mdl[[7]] == "student") {
-    d0 <- LaplacesDemon::dst(0, 10, 3)
+    d0 <- LaplacesDemon::dst(0, mdl[[8]], 3)
   }
 
 
@@ -179,7 +179,10 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
   # find the columns of the posterior distribution
   contr.parts <- unlist(strsplit(contrast,":"))
 
-  contr.column <- which(grepl(contrast,contr.names))
+  # find in which part of the contrast matrix there is the interaction.
+  # min should guarantee that we are not taking into account more complex
+  # interactions
+  contr.column <- min(which(grepl(contrast,contr.names)))
 
   contr.column <- c(contr.column, check_contrasts(contr.names[1:(contr.column-1)] , contr.parts , contrast))
 
@@ -194,7 +197,8 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
 
   for( i in 1:length(contr.parts) ){
     cp <- contr.parts[i]
-    create.names[ , i] <- as.character(tmp.data[,grepl(substr(cp , start = 1 , stop = (nchar(cp)-1) ), colnames(tmp.data) )])
+    create.names[ , i] <- as.character(tmp.data[,grepl(substr(cp , start = 1 , stop = (nchar(cp)-1) ),
+                                                       colnames(tmp.data) )])
     ricontrasts[ , i]  <- contr.table[,contr.column][,cp == colnames(contr.table[,contr.column])]
   }
 

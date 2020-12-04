@@ -15,6 +15,7 @@ BMSC(
   seed = NA,
   typeprior = "normal",
   s,
+  family = "gaussian",
   ...
 )
 }
@@ -60,6 +61,17 @@ prior distribution.
 If NULL (the default) and \code{typeprior = "normal"} or
 \code{typeprior = "student"} \code{s = 10}, otherwise, if
 \code{typeprior = "cauchy"} \code{s = sqrt(2)/2}.}
+
+\item{family}{a description of the response distribution to be used in
+this model.
+This is a character string naming the family.
+By default, a linear gaussian model is applied.
+\describe{
+\item{gaussian}{the dependent variable is distributed along a Gaussian distribution,
+with \code{identity} link function}
+\item{binomial}{the dependent variable is distributed along a Binomial distribution,
+with \code{logit} link function}
+}}
 
 \item{...}{further arguments to be passed to \strong{stan} function.}
 }
