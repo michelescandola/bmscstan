@@ -2,6 +2,22 @@
 \title{bmscstan News}
 \encoding{UTF-8}
 
+\section{Version 1.2.0}{
+  \itemize{
+    \item added code for Pareto smoothed importance sampling (PSIS) and
+          Leaving-One-Out
+    \item added function loo.BMSC
+    \item added function loo_compare.loo_BMSC
+    \item added function print.loo_BMSC
+    \item added function print.loo_compare_BMSC
+    \item added diagnostics for PSIS
+    \item modfiied main functions for binomial data
+    \item modified summary.BMSC function for binomial data
+    \item added the possibility to fit only-intercept fixed effects models
+    \item updated vignette
+  }
+}
+
 \section{Version 1.1.1}{
   \itemize{
     \item solved small bugs in pairwise.BMSC

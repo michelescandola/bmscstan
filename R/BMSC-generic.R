@@ -45,10 +45,15 @@ summary.BMSC = function(object, ...) {
     })
 
     sum01 = as.data.frame(summary(object[[2]], pars = "b_Ctrl")[[1]])
-    sum02 = as.data.frame(summary(object[[2]], pars = "sigmaC")[[1]])
+    if(object[[9]] == "gaussian"){
+        sum02 = as.data.frame(summary(object[[2]], pars = "sigmaC")[[1]])
+        sum04 = as.data.frame(summary(object[[2]], pars = "sigmaP")[[1]])
+    } else {
+        sum02 = NULL
+        sum04 = NULL
+    }
 
     sum03 = as.data.frame(summary(object[[2]], pars = "b_Delta")[[1]])
-    sum04 = as.data.frame(summary(object[[2]], pars = "sigmaP")[[1]])
 
     sum05 = as.data.frame(cbind(apply(pts, 2, mean), apply(pts, 2, se), apply(pts, 2, sd), apply(pts, 2, quantile, probs = 2.5/100), apply(pts, 2, quantile,
         probs = 25/100), apply(pts, 2, quantile, probs = 50/100), apply(pts, 2, quantile, probs = 75/100), apply(pts, 2, quantile, probs = 97.5/100)))

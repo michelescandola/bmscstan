@@ -227,6 +227,9 @@ BMSC <- function(formula, data_ctrl, data_sc,
   # build contrasts matrices of fixed effects
   fix.terms       <- form.terms[!(grepl("\\|",form.terms))]
 
+  # for models with the only intercept
+  if( length( fix.terms) == 0) fix.terms <- 1
+
   fix.formula     <- paste0(" ~",mypaste(fix.terms))
 
   matrix.fix.ctrl <- model.matrix(as.formula(fix.formula),data_ctrl)

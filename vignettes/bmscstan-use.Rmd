@@ -467,6 +467,45 @@ Here we can see that the effect was pushed by the facilitation
 that the single case had in the Left Congruent Foot condition
 compared to the Control Group.
 
+## Efficient approximate leave-one-out cross-validation for fitted BMSC models
+   
+The **bmscstan** package has wrapper functions to interface with the `loo`
+package, to diagnostic and compare BMSC models.
+
+Leaving-One-Out scores, diagnostics and comparisons are separately
+computed for the 
+Control group and the Single Case data.
+
+In order to see the Leaving-One-Out and the Pareto smoothed importance sampling
+(PSIS), it is possible to use the function `loo.BMSC`:
+
+```{r}
+print( loo1 <- loo( mdl ) )
+
+plot( loo1 )
+```
+
+Model comparison can be done by means of the `loo_compare.loo_BMSC`
+function:
+
+```{r}
+mdl.null <- BMSC(formula = RT ~ 1 +
+             (Congruency * Side | ID) + (Congruency * Side | BD_ID),
+             data_ctrl = data.ctrl,
+             data_sc = data.pt,
+             cores = 1,
+             seed = 2020)
+
+print( loo2 <- loo( mdl.null ) )
+
+plot( loo2 )
+
+loo_compare( mdl, mdl.null )
+```
+
+Further details on LOO, PSIS and their use can be found in the **loo**
+package and in the @Vehtari2016 and @Vehtari2015.
+
 ## Conclusions
 
 In this vignette we have seen how to use the package **bmscstan**

@@ -18,5 +18,5 @@ bibentry(bibtype = "Manual",
                         email = "michele.scandola@univr.it"),
          year = "2020",
          url = "https://github.com/michelescandola/bmscstan",
-         note = "R package version 1.1.1"
+         note = "R package version 1.2.0"
          )

@@ -161,3 +161,41 @@ title = {{Doing Bayesian data analysis: A tutorial with R, JAGS, and Stan, secon
 url = {http://dx.doi.org/10.1016/B978-0-12-405888-0.09999-2},
 year = {2014}
 }
+
+@article{Vehtari2016,
+abstract = {Leave-one-out cross-validation (LOO) and the widely applicable information criterion (WAIC) are methods for estimating pointwise out-of-sample prediction accuracy from a fitted Bayesian model using the log-likelihood evaluated at the posterior simulations of the parameter values. LOO and WAIC have various advantages over simpler estimates of predictive error such as AIC and DIC but are less used in practice because they involve additional computational steps. Here we lay out fast and stable computations for LOO and WAIC that can be performed using existing simulation draws. We introduce an efficient computation of LOO using Pareto-smoothed importance sampling (PSIS), a new procedure for regularizing importance weights. Although WAIC is asymptotically equal to LOO, we demonstrate that PSIS-LOO is more robust in the finite case with weak priors or influential observations. As a byproduct of our calculations, we also obtain approximate standard errors for estimated predictive errors and for comparing of predictive errors between two models. We implement the computations in an R package called 'loo' and demonstrate using models fit with the Bayesian inference package Stan.},
+archivePrefix = {arXiv},
+arxivId = {1507.04544},
+author = {Vehtari, Aki and Gelman, Andrew and Gabry, Jonah},
+doi = {10.1007/s11222-016-9696-4},
+eprint = {1507.04544},
+isbn = {1507.04544},
+issn = {0960-3174},
+journal = {Statistics and Computing},
+keywords = {Bayesian computation,K-fold cross-validation,Leave-one-out cross-validation (LOO),Pareto smoothed importance sampling (PSIS),Stan,Widely applicable information criterion (WAIC)},
+mendeley-groups = {statistica},
+month = {sep},
+number = {5},
+pages = {1413--1432},
+publisher = {Springer US},
+title = {{Practical Bayesian model evaluation using leave-one-out cross-validation and WAIC}},
+url = {http://link.springer.com/10.1007/s11222-016-9696-4},
+volume = {27},
+year = {2017}
+}
+
+@article{Vehtari2015,
+abstract = {Importance weighting is a general way to adjust Monte Carlo integration to account for draws from the wrong distribution, but the resulting estimate can be noisy when the importance ratios have a heavy right tail. This routinely occurs when there are aspects of the target distribution that are not well captured by the approximating distribution, in which case more stable estimates can be obtained by modifying extreme importance ratios. We present a new method for stabilizing importance weights using a generalized Pareto distribution fit to the upper tail of the distribution of the simulated importance ratios. The method, which empirically performs better than existing methods for stabilizing importance sampling estimates, includes stabilized effective sample size estimates, Monte Carlo error estimates and convergence diagnostics.},
+archivePrefix = {arXiv},
+arxivId = {1507.02646},
+author = {Vehtari, Aki and Simpson, Daniel and Gelman, Andrew and Yao, Yuling and Gabry, Jonah},
+eprint = {1507.02646},
+file = {:media/michele/DATA/Dropbox/SCNlab/LETTERATURA/statistics/Vehtari 2019 - Pareto Smoother Importance Sampling.pdf:pdf},
+keywords = {bayesian computation,importance sampling,monte carlo},
+mendeley-groups = {statistica},
+month = {jul},
+number = {July},
+title = {{Pareto Smoothed Importance Sampling}},
+url = {http://arxiv.org/abs/1507.02646},
+year = {2015}
+}

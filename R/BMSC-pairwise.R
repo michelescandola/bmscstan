@@ -197,8 +197,9 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
 
   for( i in 1:length(contr.parts) ){
     cp <- contr.parts[i]
-    create.names[ , i] <- as.character(tmp.data[,grepl(substr(cp , start = 1 , stop = (nchar(cp)-1) ),
-                                                       colnames(tmp.data) )])
+    # create.names[ , i] <- as.character(tmp.data[,grepl(substr(cp , start = 1 , stop = (nchar(cp)-1) ),
+    #                                                    colnames(tmp.data) )])
+    create.names[ , i] <- as.character(tmp.data[,colnames(tmp.data) %in% substr(cp , start = 1 , stop = (nchar(cp)-1) )])
     ricontrasts[ , i]  <- contr.table[,contr.column][,cp == colnames(contr.table[,contr.column])]
   }
 
