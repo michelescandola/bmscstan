@@ -1,6 +1,5 @@
-# bmscstan
+# bmscstan <img src="sticker.png" align="right" width="120" />
 
--------------------
 <!--[![CRAN checks](https://cranchecks.info/badges/summary/bmscstan)](https://cran.r-project.org/web/checks/check_results_bmscstan.html)
 [![R build status](https://github.com/michelescandola/bmscstan/workflows/R-CMD-check/badge.svg)](https://github.com/michelescandola/bmscstan/actions)-->
 
