@@ -161,12 +161,12 @@
       for(i in 1:Obs_Patients){
         tmp = inv_logit(mu_Pts[i]);
         y_pt_rep[i] = binomial_rng(n_Pts[i], tmp);
-        log_lik_pt[i] = binomial_logit_lpmf(y_Pts[i] |n_Pts, mu_Pts[i]);
+        log_lik_pt[i] = binomial_logit_lpmf(y_Pts[i] |n_Pts[i], mu_Pts[i]);
       }
       for(i in 1:Obs_Controls){
         tmp = inv_logit(mu_Ctrl[i]);
         y_ct_rep[i] = binomial_rng(n_Ctrl[i], tmp);
-        log_lik_ct[i] = binomial_logit_lpmf(y_Ctrl[i] |n_Ctrl, mu_Ctrl[i]);
+        log_lik_ct[i] = binomial_logit_lpmf(y_Ctrl[i] |n_Ctrl[i], mu_Ctrl[i]);
       }
     }"
   }

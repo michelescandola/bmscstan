@@ -304,14 +304,16 @@ analysis to better understand the phenomenon. It comes useful the function
 `pairwise.BMSC`.
 
 ```{r}
-pp <- pairwise.BMSC(mdl , contrast = "Body.District2:Congruency2" , who = "control")
+pp <- pairwise.BMSC(mdl , contrast = "Body.District2:Congruency2" ,
+                    who = "control")
 
 print( pp , digits = 3 )
 ```
 
 The output of this function is divided in two parts:
 
-- a first part, called "Marginal distributions", where the marginal distributions of 
+- a first part, called "Marginal distributions", where the marginal
+  distributions of 
   each level of the coefficients are reported with a $BF_{10}$ against zero.
 - a second part, called "Table of contrasts", with all possible pairwise
   comparisons and their $BF_{10}$.
@@ -403,7 +405,8 @@ The interactions require the use of the `pairwise.BMSC` function.
 #### The Body District : Congruency interaction:
 
 ```{r}
-p4 <- pairwise.BMSC(mdl , contrast = "Body.District2:Congruency2" , who = "delta")
+p4 <- pairwise.BMSC(mdl , contrast = "Body.District2:Congruency2" ,
+                    who = "delta")
 
 print( p4 , digits = 3 )
 ```
@@ -482,7 +485,7 @@ In order to see the Leaving-One-Out and the Pareto smoothed importance sampling
 ```{r}
 print( loo1 <- loo( mdl ) )
 
-plot( loo1 )
+plot.loo_BMSC( loo1 )
 ```
 
 Model comparison can be done by means of the `loo_compare.loo_BMSC`
@@ -494,17 +497,135 @@ mdl.null <- BMSC(formula = RT ~ 1 +
              data_ctrl = data.ctrl,
              data_sc = data.pt,
              cores = 1,
-             seed = 2020)
+             seed = 2021)
 
 print( loo2 <- loo( mdl.null ) )
 
-plot( loo2 )
+plot.loo_BMSC( loo2 )
 
-loo_compare( mdl, mdl.null )
+loo_compare( loo1, loo2 )
 ```
 
 Further details on LOO, PSIS and their use can be found in the **loo**
 package and in the @Vehtari2016 and @Vehtari2015.
+
+## A binomial case
+
+In this section, a brief example on how to use the package for binomial data.
+
+We start simulating the data.
+
+```{r}
+######################################
+# simulation of controls' group data
+######################################
+
+# Number of levels for each condition and trials
+NCond  <- 2
+Ntrials <- 20
+NSubjs  <- 40
+
+betas <- c( 0.5 , 0 )
+
+data.sim <- expand.grid(
+  trial      = 1:Ntrials,
+  ID         = factor(1:NSubjs),
+  Cond      = factor(1:NCond)
+)
+
+### d.v. generation
+y <- rep( times = nrow(data.sim) , NA )
+
+# cheap simulation of individual random intercepts
+set.seed(1)
+rsubj <- rnorm(NSubjs , sd = 0.1)
+
+for( i in 1:length( levels( data.sim$ID ) ) ){
+  
+  sel <- which( data.sim$ID == as.character(i) )
+  
+  mm  <- model.matrix(~ 1 + Cond , data = data.sim[ sel , ] )
+  
+  set.seed(1 + i)
+  y[sel] <- mm %*% as.matrix(betas + rsubj[i]) +
+    rnorm( n = Ntrials * NCond )
+  
+}
+
+data.sim$y <- y
+data.sim$bin <- sapply(invlogit(data.sim$y), function(x) rbinom( 1, 1, x))
+
+data.sim.bin <- aggregate( bin ~ Cond * ID, data = data.sim, FUN = sum)
+data.sim.bin$n <- aggregate( bin ~ Cond * ID,
+                             data = data.sim, FUN = length)$bin
+
+######################################
+# simulation of patient data
+######################################
+
+betas.pt <- c( 0 , 2  )
+
+data.pt <- expand.grid(
+  trial      = 1:Ntrials,
+  Cond      = factor(1:NCond)
+)
+
+### d.v. generation
+mm  <- model.matrix(~ 1 + Cond , data = data.pt )
+
+set.seed(5)
+data.pt$y <- (mm %*% as.matrix(betas.pt + betas) +
+  rnorm( n = Ntrials * NCond ))[,1]
+data.pt$bin <- sapply(invlogit(data.pt$y), function(x) rbinom( 1, 1, x))
+
+data.pt.bin <- aggregate( bin ~ Cond, data = data.pt, FUN = sum)
+data.pt.bin$n <- aggregate( bin ~ Cond,
+                             data = data.pt, FUN = length)$bin
+
+
+plot(x = data.sim.bin$Cond, y = data.sim.bin$bin, ylim = c(0,20))
+points(x = data.pt.bin$Cond, y = data.pt.bin$bin, col = "red")
+```
+
+The boxplot represents the control participants, the red dot the single case.
+
+Now, we can specify the model:
+
+`cbind(bin, n) ~ Cond`
+
+The right-hand side of the formula follows the usual lmer- and brms-like
+syntax. In the left-hand side of the formula, `brms` and `lme4`
+have divergent notations.
+
+In future, the `bmscstan` package will be able to use both notations,
+for the moment it is necessary the `lme4` notation `cbind(bin, n)`
+where:
+
+* `bin` is the number of observations
+* `n` is the total number of trials
+
+```{r}
+mdlBinH1 <- BMSC(formula = cbind(bin, n) ~ 1 + Cond,
+            data_ctrl = data.sim.bin, data_sc = data.pt.bin, seed = 25,
+            typeprior = "normal", family = "binomial", s = 1, cores = 1)
+
+mdlBinH0 <- BMSC(formula = cbind(bin, n) ~ 1,
+            data_ctrl = data.sim.bin, data_sc = data.pt.bin, seed = 52,
+            typeprior = "student", family = "binomial", s = 1, cores = 1)
+```
+
+Finally, to compare the two models, we will use the
+Leaving-One-Out criterion.
+
+```{r}
+looBinH1 <- loo.BMSC( mdlBinH1 )
+looBinH0 <- loo.BMSC( mdlBinH0 )
+
+loo_compare.loo_BMSC( looBinH1, looBinH0 )
+```
+
+
+
 
 ## Conclusions
 

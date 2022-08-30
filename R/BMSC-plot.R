@@ -79,52 +79,65 @@
 #' @export
 pp_check.BMSC = function(object, type = "dens", limited = FALSE , ...) {
 
-    if (class(object)[2] != "BMSC")
-        stop("Not a valid BMSC object.")
+  if (class(object)[2] != "BMSC")
+    stop("Not a valid BMSC object.")
 
-    y_ct_rep = extract(object[[2]], pars = "y_ct_rep")
-    y_pt_rep = extract(object[[2]], pars = "y_pt_rep")
+  y_ct <- y_pt <- NULL
 
+  y_ct_rep = extract(object[[2]], pars = "y_ct_rep")
+  y_pt_rep = extract(object[[2]], pars = "y_pt_rep")
+
+  if(object[[9]] == "binomial"){
+    dv = as.character(object[1])
+    dv = gsub("cbind\\(","",dv)
+    dv = gsub("\\)","",dv)
+    dv1 = unlist(strsplit(dv,","))[1]
+    dv2 = trimws(unlist(strsplit(dv,","))[2])
+
+    y_ct = object[[4]][, dv1]
+    y_pt = object[[3]][, dv1]
+  } else {
     y_ct = object[[4]][, as.character(object[[1]][2])]
     y_pt = object[[3]][, as.character(object[[1]][2])]
+  }
 
-    ans = list()
+  ans = list()
 
-    if ((requireNamespace("bayesplot", quietly = TRUE)) && (requireNamespace("gridExtra", quietly = TRUE))) {
-        if (type == "hist") {
-            ct = bayesplot::ppc_hist(y_ct, y_ct_rep[[1]][1:8, ], ...) + ggtitle("Control Group")
-            pt = bayesplot::ppc_hist(y_pt, y_pt_rep[[1]][1:8, ], ...) + ggtitle("Single Case")
+  if ((requireNamespace("bayesplot", quietly = TRUE)) && (requireNamespace("gridExtra", quietly = TRUE))) {
+    if (type == "hist") {
+      ct = bayesplot::ppc_hist(y_ct, y_ct_rep[[1]][1:8, ], ...) + ggtitle("Control Group")
+      pt = bayesplot::ppc_hist(y_pt, y_pt_rep[[1]][1:8, ], ...) + ggtitle("Single Case")
 
-            if (limited) {
-                ct = ct + coord_cartesian(xlim = quantile(y_ct , probs = c(0.025 , 0.975)) - c(IQR(y_ct) , -IQR(y_ct) ) )
-                pt = pt + coord_cartesian(xlim = quantile(y_pt , probs = c(0.025 , 0.975)) - c(IQR(y_pt) , -IQR(y_pt) ) )
-            }
+      if (limited) {
+        ct = ct + coord_cartesian(xlim = quantile(y_ct , probs = c(0.025 , 0.975)) - c(IQR(y_ct) , -IQR(y_ct) ) )
+        pt = pt + coord_cartesian(xlim = quantile(y_pt , probs = c(0.025 , 0.975)) - c(IQR(y_pt) , -IQR(y_pt) ) )
+      }
 
-            ans = gridExtra::grid.arrange(ct, pt)
-        } else if (type == "mode") {
-            ct = bayesplot::ppc_stat(y_ct, y_ct_rep[[1]], stat = "Mode" , ...) + ggtitle("Control Group")
-            pt = bayesplot::ppc_stat(y_pt, y_pt_rep[[1]], stat = "Mode" , ...) + ggtitle("Single Case")
+      ans = gridExtra::grid.arrange(ct, pt)
+    } else if (type == "mode") {
+      ct = bayesplot::ppc_stat(y_ct, y_ct_rep[[1]], stat = "Mode" , ...) + ggtitle("Control Group")
+      pt = bayesplot::ppc_stat(y_pt, y_pt_rep[[1]], stat = "Mode" , ...) + ggtitle("Single Case")
 
-            if (limited) {
-                ct = ct + coord_cartesian(xlim = quantile(y_ct , probs = c(0.025 , 0.975)) - c(IQR(y_ct) , -IQR(y_ct) ) )
-                pt = pt + coord_cartesian(xlim = quantile(y_pt , probs = c(0.025 , 0.975)) - c(IQR(y_pt) , -IQR(y_pt) ) )
-            }
+      if (limited) {
+        ct = ct + coord_cartesian(xlim = quantile(y_ct , probs = c(0.025 , 0.975)) - c(IQR(y_ct) , -IQR(y_ct) ) )
+        pt = pt + coord_cartesian(xlim = quantile(y_pt , probs = c(0.025 , 0.975)) - c(IQR(y_pt) , -IQR(y_pt) ) )
+      }
 
-            ans = gridExtra::grid.arrange(ct, pt)
-        } else {
-            ct = bayesplot::ppc_dens_overlay(y_ct, y_ct_rep[[1]][1:200, ], ...) + ggtitle("Control Group")
-            pt = bayesplot::ppc_dens_overlay(y_pt, y_pt_rep[[1]][1:200, ], ...) + ggtitle("Single Case")
+      ans = gridExtra::grid.arrange(ct, pt)
+    } else {
+      ct = bayesplot::ppc_dens_overlay(y_ct, y_ct_rep[[1]][1:200, ], ...) + ggtitle("Control Group")
+      pt = bayesplot::ppc_dens_overlay(y_pt, y_pt_rep[[1]][1:200, ], ...) + ggtitle("Single Case")
 
-            if (limited) {
-                ct = ct + coord_cartesian(xlim = quantile(y_ct , probs = c(0.025 , 0.975)) - c(IQR(y_ct) , -IQR(y_ct) ) )
-                pt = pt + coord_cartesian(xlim = quantile(y_pt , probs = c(0.025 , 0.975)) - c(IQR(y_pt) , -IQR(y_pt) ) )
-            }
+      if (limited) {
+        ct = ct + coord_cartesian(xlim = quantile(y_ct , probs = c(0.025 , 0.975)) - c(IQR(y_ct) , -IQR(y_ct) ) )
+        pt = pt + coord_cartesian(xlim = quantile(y_pt , probs = c(0.025 , 0.975)) - c(IQR(y_pt) , -IQR(y_pt) ) )
+      }
 
-            ans = gridExtra::grid.arrange(ct, pt)
-        }
+      ans = gridExtra::grid.arrange(ct, pt)
     }
+  }
 
-    return(ans)
+  return(ans)
 }
 
 #' Plot estimates from a \code{BMSC} object.

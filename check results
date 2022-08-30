@@ -1,0 +1,155 @@
+   See
+     ‘/media/michele/DATA/Dropbox/BASIC-NPSY/bmscstan.Rcheck/00check.log’
+   for details.
+
+
+── R CMD check results ──────────────────────────────── bmscstan 1.2.0.9999 ────
+Duration: 3h 24m 24.1s
+
+> checking whether the namespace can be loaded with stated dependencies ... WARNING
+  Errore: object 'loo_compare' not found whilst loading namespace 'bmscstan'
+  Esecuzione interrotta
+
+  A namespace must be able to be loaded with just the base namespace
+  loaded: otherwise if the namespace gets loaded by a saved object, the
+  session will be unable to start.
+
+  Probably some imports need to be declared in the NAMESPACE file.
+
+> checking whether the namespace can be unloaded cleanly ... WARNING
+  Errore: oggetto 'loo_compare' non trovato durante il caricamento del namespace 'bmscstan'
+  Inoltre: Warning message:
+  replacing previous import ‘vctrs::data_frame’ by ‘tibble::data_frame’ when loading ‘dplyr’
+  Esecuzione interrotta
+
+> checking S3 generic/method consistency ... WARNING
+  plot:
+    function(x, ...)
+  plot.loo_BMSC:
+    function(x)
+
+  print:
+    function(x, ...)
+  print.loo_BMSC:
+    function(x)
+
+  print:
+    function(x, ...)
+  print.loo_compare_BMSC:
+    function(x, simplify)
+
+  print:
+    function(x, ...)
+  print.mcse_loo_BMSC:
+    function(x)
+
+  print:
+    function(x, ...)
+  print.pareto_k_ids_BMSC:
+    function(x)
+
+  print:
+    function(x, ...)
+  print.pareto_k_influence_values_BMSC:
+    function(x)
+
+  print:
+    function(x, ...)
+  print.pareto_k_table_BMSC:
+    function(x)
+
+  print:
+    function(x, ...)
+  print.pareto_k_values_BMSC:
+    function(x)
+
+  print:
+    function(x, ...)
+  print.psis_n_eff_values_BMSC:
+    function(x)
+
+  print:
+    function(x, ...)
+  print.waic_BMSC:
+    function(x)
+
+  print:
+    function(x, ...)
+  print.waic_compare_BMSC:
+    function(x, simplify)
+
+  loo:
+    function(x, ...)
+  loo.BMSC:
+    function(mdl, cores, ...)
+
+  loo_compare:
+    function(x, ...)
+  loo_compare.loo_BMSC:
+    function(mdl1, mdl2)
+
+  loo_compare:
+    function(x, ...)
+  loo_compare.waic_BMSC:
+    function(mdl1, mdl2)
+
+  waic:
+    function(x, ...)
+  waic.BMSC:
+    function(mdl, ...)
+
+  See section ‘Generic functions and methods’ in the ‘Writing R
+  Extensions’ manual.
+
+  Found the following apparent S3 methods exported but not registered:
+    plot.loo_BMSC
+  See section ‘Registering S3 methods’ in the ‘Writing R Extensions’
+  manual.
+
+> checking Rd cross-references ... WARNING
+  Missing link or links in documentation object 'loo.BMSC.Rd':
+    ‘loo::relative_eff’
+
+  See section 'Cross-references' in the 'Writing R Extensions' manual.
+
+> checking for missing documentation entries ... WARNING
+  Undocumented code objects:
+    ‘mcse_loo.loo_BMSC’ ‘pareto_k_ids.loo_BMSC’
+    ‘pareto_k_influence_values.loo_BMSC’ ‘pareto_k_table.loo_BMSC’
+    ‘pareto_k_values.loo_BMSC’ ‘plot.loo_BMSC’
+    ‘psis_n_eff_values.loo_BMSC’
+  All user-level objects in a package should have documentation entries.
+  See chapter ‘Writing R documentation files’ in the ‘Writing R
+  Extensions’ manual.
+
+> checking package dependencies ... NOTE
+  Depends: includes the non-default packages:
+    'rstan', 'logspline', 'bayesplot', 'LaplacesDemon', 'ggplot2', 'loo',
+    'coda'
+  Adding so many packages to the search path is excessive and importing
+  selectively is preferable.
+
+> checking DESCRIPTION meta-information ... NOTE
+  Package listed in more than one of Depends, Imports, Suggests, Enhances:
+    ‘coda’
+  A package should be listed in only one of these fields.
+
+> checking top-level files ... NOTE
+  Non-standard file/directory found at top level:
+    ‘README.Rmd’
+
+> checking dependencies in R code ... NOTE
+  Packages in Depends field not imported from:
+    ‘coda’ ‘loo’
+    These packages need to be imported from (in the NAMESPACE file)
+    for when this namespace is loaded but not attached.
+
+> checking R code for possible problems ... NOTE
+  Errore: object 'loo_compare' not found whilst loading namespace 'bmscstan'
+  Esecuzione interrotta
+
+0 errors ✓ | 5 warnings x | 5 notes x
+Errore: R CMD check found WARNINGs
+Esecuzione interrotta
+
+Exited with status 1.

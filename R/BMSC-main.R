@@ -221,11 +221,29 @@ BMSC <- function(formula, data_ctrl, data_sc,
   if(family!="gaussian"&&family!="binomial")
     stop("Not a valid family (only gaussian and binomial are supported)")
 
+  data_ctrl <- droplevels(data_ctrl)
+  data_sc   <- droplevels(data_sc)
+
+  if(sum(class(data_ctrl) != "data.frame")>0)
+    data_ctrl <- as.data.frame(data_ctrl)
+
+  if(sum(class(data_sc) != "data.frame")>0)
+    data_sc <- as.data.frame(data_sc)
+
+  for(ic in 1:ncol(data_ctrl))
+    if(class(data_ctrl[,ic]) == "character")
+      data_ctrl[,ic] <- as.factor(data_ctrl[,ic])
+
+  for(ic in 1:ncol(data_sc))
+    if(class(data_sc[,ic]) == "character")
+      data_sc[,ic] <- as.factor(data_sc[,ic])
+
   # extract formula's terms
   form.terms      <- attributes(terms(formula))$term.labels
 
   # build contrasts matrices of fixed effects
   fix.terms       <- form.terms[!(grepl("\\|",form.terms))]
+
 
   # for models with the only intercept
   if( length( fix.terms) == 0) fix.terms <- 1
