@@ -89,6 +89,7 @@ dataset there also is an `ID` factor, representing the different 16 control
 participants.
 
 ```{r, fig.height= 6, fig.width= 6}
+library(ggplot2)
 library(bmscstan)
 
 data(BSE)
@@ -163,17 +164,12 @@ syntax should be straightforward.
 
 In this case, we want to fit the following model:
 
-`RT ~ Body.District * Congruency * Side + (Congruency * Side | ID / Body.District)`
+`RT ~ Body.District * Congruency * Side + (Congruency * Side | ID : Body.District)`
 
-Unfortunately, `BMSC` does not directly allow the syntax `ID / Body.District`
+Unfortunately, `BMSC` does not directly allow the syntax `ID : Body.District`
 in the specification of the random effects.
 
-In any case, taking into consideration that `(1 | ID / Body.District)` is a
-short
-version of `(1 | ID : Body.District) + (1 | ID)`, it is possible to solve this
-problem.
-
-It is necessary to create a new variable for `ID : Body.District`
+Therefore, it is necessary to create a new variable for `ID : Body.District`
 
 ```{r}
 data.ctrl$BD_ID <- interaction( data.ctrl$Body.District , data.ctrl$ID )
@@ -181,7 +177,10 @@ data.ctrl$BD_ID <- interaction( data.ctrl$Body.District , data.ctrl$ID )
 
 and the model would be:
 
-`RT ~ Body.District * Congruency * Side + (Congruency * Side | BD_ID) + (Congruency * Side | ID)`
+`RT ~ Body.District * Congruency * Side + (Congruency * Side | BD_ID)`
+
+For further details concerning the random effects available in 
+`bmscstan`, please type `?bmscstan::randomeffect`.
 
 ## Fitting the BMSC model
 
@@ -190,9 +189,10 @@ a single function.
 
 ```{r, warning = FALSE, message = FALSE}
 mdl <- BMSC(formula = RT ~ Body.District * Congruency * Side +
-             (Congruency * Side | ID) + (Congruency * Side | BD_ID),
+             (Congruency * Side | BD_ID),
              data_ctrl = data.ctrl,
              data_sc = data.pt,
+             chains = 2,
              cores = 1,
              seed = 2020)
 ```
@@ -250,7 +250,7 @@ parts:
   difference between the single case and the control group are shown.
 
 ```{r}
-print( summary( mdl ) , digits = 3 )
+print( sum_mdl <- summary( mdl ) , digits = 3 )
 ```
 
 In the second and fourth part of the output, we can observe a descriptive
@@ -285,12 +285,16 @@ is important before of seeing the differences with the single case.
 In this analysis, there are 5 fixed effects which $BF_{10}$ is greater than
 3 [@Raftery1995].
 
-- Intercept $BF_{10} > 150$, $\mu = 199.88$, $95\%~CI = [184.55; 215.072]$.
-- Body District $BF_{10} = 54.8$, $\mu = 17.20$, $95\%~CI = [6.22; 28.931]$.
-- Congruency $BF_{10} = 21.2$, $\mu = 16.10$, $95\%~CI = [4.08; 30.272]$.
-- Side $BF_{10} = 31.9$, $\mu = 19.11$, $95\%~CI = [5.01; 33.919]$.
-- Body District : Congruency $BF_{10} = 3.81$, $\mu = -10.03$,
-  $95\%~CI = [-19.84; -0.375]$.
+```{r}
+tmp <- sum_mdl[[1]][sum_mdl[[1]]$BF10 > 3,c("BF10","mean","2.5%","97.5%")]
+
+colnames(tmp) <- c("$BF_{10}$", "$\\mu$", "low $95\\%~CI$", "up $95\\%~CI$")
+
+knitr::kable(
+  tmp,
+  digits = 3
+)
+```
 
 We can have a general overview of the coefficients of the model with the
 `plot.BMSC` function.
@@ -378,16 +382,16 @@ plot( mdl ,who = "delta" ) +
 
 The relevant coefficients are:
 
-- Intercept $BF_{10} > 150$, $\mu = 194.97$, $95\%~CI = [179.54; 210.071]$.
-- Body District $BF_{10} = 134$, $\mu = 23.29$, $95\%~CI = [9.66; 36.945]$.
-- Congruency $BF_{10} > 150$, $\mu = 31.04$, $95\%~CI = [16.30; 45.651]$.
-- Side $BF_{10} > 150$, $\mu = 31.60$, $95\%~CI = [16.11; 46.469]$.
-- Body District : Congruency $BF_{10} = 8.47$, $\mu = -16.82$,
-  $95\%~CI = [-31.99; -1.750]$.
-- Body District : Side $BF_{10} = 7.31$, $\mu = -16.61$,
-  $95\%~CI = [-31.49; -1.474]$.
-- Body District : Congruency : Side $BF_{10} = 6.37$, $\mu = -16.85$,
-  $95\%~CI = [-33.74; -11.10]$.
+```{r}
+tmp <- sum_mdl[[3]][sum_mdl[[3]]$BF10 > 3,c("BF10","mean","2.5%","97.5%")]
+
+colnames(tmp) <- c("$BF_{10}$", "$\\mu$", "low $95\\%~CI$", "up $95\\%~CI$")
+
+knitr::kable(
+  tmp,
+  digits = 3
+)
+```
   
 The Intercept coefficient is showing us that the single case is generally
 slower than the Control Sample (generally speaking, when you analyse healthy
@@ -493,10 +497,11 @@ function:
 
 ```{r}
 mdl.null <- BMSC(formula = RT ~ 1 +
-             (Congruency * Side | ID) + (Congruency * Side | BD_ID),
+             (Congruency * Side | BD_ID),
              data_ctrl = data.ctrl,
              data_sc = data.pt,
              cores = 1,
+             chains = 2,
              seed = 2021)
 
 print( loo2 <- loo( mdl.null ) )
@@ -507,7 +512,7 @@ loo_compare( loo1, loo2 )
 ```
 
 Further details on LOO, PSIS and their use can be found in the **loo**
-package and in the @Vehtari2016 and @Vehtari2015.
+package and in @Vehtari2016 and @Vehtari2015.
 
 ## A binomial case
 
@@ -605,27 +610,13 @@ where:
 * `n` is the total number of trials
 
 ```{r}
-mdlBinH1 <- BMSC(formula = cbind(bin, n) ~ 1 + Cond,
-            data_ctrl = data.sim.bin, data_sc = data.pt.bin, seed = 25,
-            typeprior = "normal", family = "binomial", s = 1, cores = 1)
+mdlBin <- BMSC(formula = cbind(bin, n) ~ 1 + Cond,
+            data_ctrl = data.sim.bin, data_sc = data.pt.bin, seed = 2022,
+            chains = 2,
+            family = "binomial", cores = 1)
 
-mdlBinH0 <- BMSC(formula = cbind(bin, n) ~ 1,
-            data_ctrl = data.sim.bin, data_sc = data.pt.bin, seed = 52,
-            typeprior = "student", family = "binomial", s = 1, cores = 1)
+print( summary( mdlBin ) , digits = 3 )
 ```
-
-Finally, to compare the two models, we will use the
-Leaving-One-Out criterion.
-
-```{r}
-looBinH1 <- loo.BMSC( mdlBinH1 )
-looBinH0 <- loo.BMSC( mdlBinH0 )
-
-loo_compare.loo_BMSC( looBinH1, looBinH0 )
-```
-
-
-
 
 ## Conclusions
 
