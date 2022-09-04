@@ -23,7 +23,7 @@ Single Case and the group will be estimated.
 
 The model to estimate the controls parameters is:
 
-\ifelse{html}{\out{<center><i>y~N(&beta; X + b Z, &sigma;<sup>2</sup>)</i></center>}}{\eqn{y~N(\beta X + b Z, \sigma^2)}}
+\ifelse{html}{\out{<p style="text-align:center;text-style:italic;">y~N(&beta; X + b Z, &sigma;<sup>2</sup>)</p>}}{\eqn{y~N(\beta X + b Z, \sigma^2)}}
 
 
 where \eqn{y} is the controls' dependent variable, \eqn{X} the contrast
@@ -36,7 +36,7 @@ estimates for the varying effects.
 
 In order to estimate the coefficients of the Single Case, the formula is the following:
 
-\ifelse{html}{\out{<center><i>y<sub>pt</sub>~N(&phi; X<sub>pt</sub>, &sigma;<sup>2</sup><sub>pt</<sub>)</i></center>}}{\eqn{y_{pt}~N(\phi X_{pt}, \sigma_{pt}^2)}}
+\ifelse{html}{\out{<p style="text-align:center;text-style:italic;">y<sub>pt</sub>~N(&phi; X<sub>pt</sub>, &sigma;<sup>2</sup><sub>pt</sub>)</p>}}{\eqn{y_{pt}~N(\phi X_{pt}, \sigma_{pt}^2)}}
 
 where \eqn{\phi = \beta + \delta}.
 
