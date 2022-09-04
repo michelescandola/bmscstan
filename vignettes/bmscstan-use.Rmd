@@ -41,7 +41,7 @@ of a Multilevel Model, with single case and controls data.
 
 The core function of the **bmscstan** package is `BMSC`,
 whose theoretical assumptions, and its validation are
-reported in [@scandola_romano_2020].
+reported in [@scandola_romano_2021].
 
 The syntax used by the `BMSC` function is extremely similar to the syntax
 used in the `lme4` package. However, the specification of random effects
@@ -308,7 +308,7 @@ analysis to better understand the phenomenon. It comes useful the function
 `pairwise.BMSC`.
 
 ```{r}
-pp <- pairwise.BMSC(mdl , contrast = "Body.District2:Congruency2" ,
+pp <- pairwise.BMSC(mdl = mdl , contrast = "Body.District2:Congruency2" ,
                     who = "control")
 
 print( pp , digits = 3 )
@@ -487,12 +487,12 @@ In order to see the Leaving-One-Out and the Pareto smoothed importance sampling
 (PSIS), it is possible to use the function `loo.BMSC`:
 
 ```{r}
-print( loo1 <- loo( mdl ) )
+print( loo1 <- BMSC_loo( mdl ) )
 
-plot.loo_BMSC( loo1 )
+plot( loo1 )
 ```
 
-Model comparison can be done by means of the `loo_compare.loo_BMSC`
+Model comparison can be done by means of the `BMSC_loo_compare`
 function:
 
 ```{r}
@@ -504,11 +504,11 @@ mdl.null <- BMSC(formula = RT ~ 1 +
              chains = 2,
              seed = 2021)
 
-print( loo2 <- loo( mdl.null ) )
+print( loo2 <- BMSC_loo( mdl.null ) )
 
-plot.loo_BMSC( loo2 )
+plot( loo2 )
 
-loo_compare( loo1, loo2 )
+BMSC_loo_compare( list( loo1, loo2 ) )
 ```
 
 Further details on LOO, PSIS and their use can be found in the **loo**
@@ -558,7 +558,10 @@ for( i in 1:length( levels( data.sim$ID ) ) ){
 }
 
 data.sim$y <- y
-data.sim$bin <- sapply(invlogit(data.sim$y), function(x) rbinom( 1, 1, x))
+data.sim$bin <- sapply(
+  LaplacesDemon::invlogit(data.sim$y),
+  function(x) rbinom( 1, 1, x)
+  )
 
 data.sim.bin <- aggregate( bin ~ Cond * ID, data = data.sim, FUN = sum)
 data.sim.bin$n <- aggregate( bin ~ Cond * ID,
@@ -581,7 +584,10 @@ mm  <- model.matrix(~ 1 + Cond , data = data.pt )
 set.seed(5)
 data.pt$y <- (mm %*% as.matrix(betas.pt + betas) +
   rnorm( n = Ntrials * NCond ))[,1]
-data.pt$bin <- sapply(invlogit(data.pt$y), function(x) rbinom( 1, 1, x))
+data.pt$bin <- sapply(
+  LaplacesDemon::invlogit(data.pt$y),
+  function(x) rbinom( 1, 1, x)
+  )
 
 data.pt.bin <- aggregate( bin ~ Cond, data = data.pt, FUN = sum)
 data.pt.bin$n <- aggregate( bin ~ Cond,

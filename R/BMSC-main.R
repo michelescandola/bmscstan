@@ -195,8 +195,9 @@ NULL
 #'
 #' @export
 BMSC <- function(formula, data_ctrl, data_sc,
-                cores = 1, chains = 4, warmup = 2000,
-                iter = 4000, seed = NA, typeprior = "normal",
+                cores = 1, chains = 4, iter = 4000,
+                warmup,
+                seed = NA, typeprior = "normal",
                 s, family = "gaussian", ...){
   ## default s value
   if(missing(s)){
@@ -221,8 +222,10 @@ BMSC <- function(formula, data_ctrl, data_sc,
   if(family!="gaussian"&&family!="binomial")
     stop("Not a valid family (only gaussian and binomial are supported)")
 
-  data_ctrl <- droplevels(data_ctrl)
-  data_sc   <- droplevels(data_sc)
+  if(missing(warmup)) warmup <- round( iter/2 , 0 )
+
+  old_ctrl  <- data_ctrl
+  old_sc    <- data_sc
 
   if(sum(class(data_ctrl) != "data.frame")>0)
     data_ctrl <- as.data.frame(data_ctrl)
@@ -231,11 +234,11 @@ BMSC <- function(formula, data_ctrl, data_sc,
     data_sc <- as.data.frame(data_sc)
 
   for(ic in 1:ncol(data_ctrl))
-    if(class(data_ctrl[,ic]) == "character")
+    if(inherits(data_ctrl[,ic], "character"))
       data_ctrl[,ic] <- as.factor(data_ctrl[,ic])
 
   for(ic in 1:ncol(data_sc))
-    if(class(data_sc[,ic]) == "character")
+    if(inherits(data_sc[,ic], "character"))
       data_sc[,ic] <- as.factor(data_sc[,ic])
 
   # extract formula's terms
@@ -275,7 +278,7 @@ BMSC <- function(formula, data_ctrl, data_sc,
              chains = chains,cores = cores, warmup = warmup,
              seed = seed, ...))
 
-  out <- list(formula,mdl,data_sc,data_ctrl,datalist,stancode,typeprior,s,family)
+  out <- list(formula,mdl,old_sc,old_ctrl,datalist,stancode,typeprior,s,family)
   # 1. formula
   # 2. mdl
   # 3. data single case

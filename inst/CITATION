@@ -1,17 +1,18 @@
 citHeader("To cite bmscstan in publications use:")
 
 bibentry(bibtype = "Article",
-        title={Bayesian multilevel single case models using ‘Stan’. A new tool to study single cases in neuropsychology},
-        author={Scandola, Michele and Romano, Daniele},
-        journal={Neuropsychologia},
-        volume={156},
+        title={"Bayesian multilevel single case models using \'Stan\'. A new tool to study single cases in neuropsychology"},
+        author=c(person("Michele", "Scandola"),
+                    person("Daniele", "Romano")),
+        journal={"Neuropsychologia"},
+        volume={"156"},
         pages={107834},
-        year={2021},
-        publisher={Elsevier}
+        year={"2021"},
+        publisher={"Elsevier"}
          )
 
 bibentry(bibtype = "Manual",
-         title = "bmscstan: Bayesian Multilevel Single Case models using \'Stan\'",
+         title = {"bmscstan: Bayesian Multilevel Single Case models using \'Stan\'"},
          author = person("Michele", "Scandola",
                         role = c("aut", "trl", "cre"),
                         email = "michele.scandola@univr.it"),

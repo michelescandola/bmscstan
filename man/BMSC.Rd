@@ -10,8 +10,8 @@ BMSC(
   data_sc,
   cores = 1,
   chains = 4,
-  warmup = 2000,
   iter = 4000,
+  warmup,
   seed = NA,
   typeprior = "normal",
   s,
@@ -32,12 +32,12 @@ containing data of all variables used in the model for the Single Case}
 
 \item{chains}{Number of Markov chains (defaults to 4).}
 
+\item{iter}{Number of total iterations per chain (including warmup; defaults to 4000).}
+
 \item{warmup}{A positive integer specifying number of warmup (aka burnin) iterations.
 This also specifies the number of iterations used for stepsize adaptation,
 so warmup samples should not be used for inference. The number of warmup should
 not be larger than iter and the default is 2000.}
-
-\item{iter}{Number of total iterations per chain (including warmup; defaults to 4000).}
 
 \item{seed}{The seed for random number generation to make results reproducible.
 If NA (the default), Stan will set the seed randomly.}

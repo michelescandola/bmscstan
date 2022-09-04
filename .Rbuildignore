@@ -1,0 +1,14 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^doc$
+^Meta$
+cran-comments.md
+NEWS.Rd
+fitBSE.RData
+exercitation.R
+badges_hexagon.R
+README.Rmd
+check results
+sticker.png
+^codecov\.yml$
+..Rcheck

@@ -103,16 +103,22 @@
 #' @return a \code{pairwise.BMSC} object
 #'
 #' @export
-pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
-  # function to find all the column of the posterior distribution involved in the contrast
-  check_contrasts <- function( contr.names , contr.parts , contrast ){
+pairwise.BMSC = function(mdl,
+                         contrast,
+                         covariate = NULL,
+                         who = "delta") {
+  # function to find all the column of the posterior distribution involved
+  # in the contrast
+  check_contrasts <- function( contr.names , contr.parts ){
     M <- strsplit(contr.names , ":")
     out <- NULL
     len <- NULL
     i <- 1
 
-    ## in this loop I store in len the number of main effects present in every coefficients (main effects and interactions)
-    ## and I check, for each coefficient, how many of the main effects involved in the contrast are present, storing it in out
+    ## in this loop I store in len the number of main effects present in
+    ## every coefficients (main effects and interactions)
+    ## and I check, for each coefficient, how many of the main effects
+    ## involved in the contrast are present, storing it in out
     for(m in M){
       len <- c(len , length(m))
       for(cp in contr.parts){
@@ -147,11 +153,12 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
   if (class(mdl)[2] != "BMSC")
     stop("Not a valid BMSC object.")
 
-  if (!exists("contrast"))
+  if (missing(contrast))
     stop("Not a valid contrast")
 
   # variable declaration
-  tmp.post <- tmp.data <- contr.names <- contr.column <- contr.parts <- contr.table <-
+  tmp.post <- tmp.data <- contr.names <- contr.column <- contr.parts <-
+    contr.table <-
     tmp.marginal <- findRow <- sum_logspl <- bf_sd <- tmp.y <- NULL
 
   # extracting data from BMSC model
@@ -184,7 +191,9 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
   # interactions
   contr.column <- min(which(grepl(contrast,contr.names)))
 
-  contr.column <- c(contr.column, check_contrasts(contr.names[1:(contr.column-1)] , contr.parts , contrast))
+  contr.column <- c(contr.column,
+                    check_contrasts(contr.names[1:(contr.column-1)] ,
+                                    contr.parts ))
 
   contr.column <- c(contr.column, which(grepl("(Intercept)",contr.names)))
 
@@ -197,9 +206,11 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
 
   for( i in 1:length(contr.parts) ){
     cp <- contr.parts[i]
-    # create.names[ , i] <- as.character(tmp.data[,grepl(substr(cp , start = 1 , stop = (nchar(cp)-1) ),
-    #                                                    colnames(tmp.data) )])
-    create.names[ , i] <- as.character(tmp.data[,colnames(tmp.data) %in% substr(cp , start = 1 , stop = (nchar(cp)-1) )])
+
+    create.names[ , i] <- as.character(
+      tmp.data[,colnames(tmp.data) %in%
+                 substr(cp , start = 1 , stop = (nchar(cp)-1) )]
+      )
     ricontrasts[ , i]  <- contr.table[,contr.column][,cp == colnames(contr.table[,contr.column])]
   }
 
@@ -216,10 +227,19 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
   for(i in 1:nrow(create.names)){
     findRow <- NULL
     for(j in 1:nrow(tmp.table)){
-      if(sum(tmp.table[j,colnames(tmp.table)%in%contr.parts] == create.names[i,2:(length(contr.parts)+1)])==length(contr.parts)) findRow <- j
+      if(
+        sum(
+          tmp.table[j,colnames(tmp.table)%in%contr.parts] ==
+          create.names[i,2:(length(contr.parts)+1)]
+          ) == length(contr.parts)
+        ) findRow <- j
     }
-    marginal_distribution[[create.names[i,1]]] <- data.frame( y = colSums(t(tmp.post[[1]][,contr.column])*tmp.table[findRow,]),
-                                            name = create.names[i,1])
+    marginal_distribution[[create.names[i,1]]] <-
+      data.frame( y = colSums(
+        t(tmp.post[[1]][,contr.column])*
+          tmp.table[findRow,]),
+        name = create.names[i,1]
+        )
   }
 
 
@@ -231,17 +251,21 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
     sum_logspl <- .suppresslogspline(marginal_name$y)
     bf_sd <- d0/.suppressdlogspline(0, sum_logspl)
 
-    sum.unique[[marginal_name$name[1]]] <- as.data.frame(cbind(mean(marginal_name$y),
-                                                               se(marginal_name$y),
-                                                               sd(marginal_name$y),
-                                                               quantile(marginal_name$y, probs = 2.5/100),
-                                                               quantile(marginal_name$y, probs = 25/100),
-                                                               quantile(marginal_name$y, probs = 50/100),
-                                                               quantile(marginal_name$y, probs = 75/100),
-                                                               quantile(marginal_name$y, probs = 97.5/100),
-                                                               bf_sd))
+    sum.unique[[marginal_name$name[1]]] <-
+      as.data.frame(cbind(mean(marginal_name$y),
+                          se(marginal_name$y),
+                          sd(marginal_name$y),
+                          quantile(marginal_name$y, probs = 2.5/100),
+                          quantile(marginal_name$y, probs = 25/100),
+                          quantile(marginal_name$y, probs = 50/100),
+                          quantile(marginal_name$y, probs = 75/100),
+                          quantile(marginal_name$y, probs = 97.5/100),
+                          bf_sd))
 
-    colnames(sum.unique[[marginal_name$name[1]]]) <- c("mean", "se_mean", "sd", "2.5%", "25%", "50%", "75%", "97.5%","BF10 (not zero)")
+    colnames(sum.unique[[marginal_name$name[1]]]) <-
+      c("mean", "se_mean", "sd",
+        "2.5%", "25%", "50%", "75%", "97.5%",
+        "BF10 (not zero)")
   }
 
   sum.unique <- do.call("rbind" , sum.unique)
@@ -260,21 +284,24 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
       sum_logspl <- .suppresslogspline(tmp.y)
       bf_sd <- d0/.suppressdlogspline(0, sum_logspl)
 
-      sum.contrast[[paste(i,j)]] <- as.data.frame(cbind(mean(tmp.y),
-                                                                 se(tmp.y),
-                                                                 sd(tmp.y),
-                                                                 quantile(tmp.y, probs = 2.5/100),
-                                                                 quantile(tmp.y, probs = 25/100),
-                                                                 quantile(tmp.y, probs = 50/100),
-                                                                 quantile(tmp.y, probs = 75/100),
-                                                                 quantile(tmp.y, probs = 97.5/100),
-                                                                 bf_sd))
+      sum.contrast[[paste(i,j)]] <-
+        as.data.frame(cbind(mean(tmp.y),
+                            se(tmp.y),
+                            sd(tmp.y),
+                            quantile(tmp.y, probs = 2.5/100),
+                            quantile(tmp.y, probs = 25/100),
+                            quantile(tmp.y, probs = 50/100),
+                            quantile(tmp.y, probs = 75/100),
+                            quantile(tmp.y, probs = 97.5/100),
+                            bf_sd))
 
-      colnames(sum.contrast[[paste(i,j)]]) <- c("mean", "se_mean", "sd", "2.5%", "25%", "50%", "75%", "97.5%","BF10")
+      colnames(sum.contrast[[paste(i,j)]]) <-
+        c("mean", "se_mean", "sd", "2.5%", "25%", "50%", "75%", "97.5%","BF10")
 
-      sum.names[[paste(i,j)]] <- paste(marginal_distribution[[i]]$name[1],
-                                                 marginal_distribution[[j]]$name[1],
-                                                 sep = " - ")
+      sum.names[[paste(i,j)]] <- paste(
+        marginal_distribution[[i]]$name[1],
+        marginal_distribution[[j]]$name[1],
+        sep = " - ")
     }
   }
 
@@ -282,7 +309,8 @@ pairwise.BMSC = function(mdl, contrast, covariate = NULL, who = "delta") {
 
   row.names(sum.contrast) <- do.call("c" , sum.names)
 
-  out <- list(sum.unique , sum.contrast , contrast , covariate , marginal_distribution , mdl[[7]])
+  out <- list(sum.unique , sum.contrast , contrast ,
+              covariate , marginal_distribution , mdl[[7]])
 
   class(out) <- append(class(out),"pairwise.BMSC")
 

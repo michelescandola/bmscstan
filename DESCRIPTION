@@ -1,7 +1,7 @@
 Package: bmscstan
 Type: Package
 Title: Bayesian Multilevel Single Case Models using 'Stan'
-Version: 1.2.0.1
+Version: 1.2.1.0
 Authors@R: person("Michele", "Scandola", email = "michele.scandola@univr.it",
                   role = c("aut", "cre"), comment = c(ORCID = "0000-0003-0853-8975"))
 Description: Analyse single case analyses against a control group.
@@ -10,19 +10,22 @@ Description: Analyse single case analyses against a control group.
     approach that can manage at the same time controls' and patient's data.
     The use of Bayesian statistics allows to test both the alternative and
     null hypothesis.
-    Scandola, M., & Romano, D. (2020, August 3). <doi:10.31234/osf.io/sajdq>.
+    Scandola, M., & Romano, D. (2020, August 3). <doi:10.31234/osf.io/sajdq>
+    Scandola, M., & Romano, D. (2021). <doi:10.1016/j.neuropsychologia.2021.107834>.
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.5.0), rstan, logspline, bayesplot, LaplacesDemon, ggplot2, loo, coda
-Imports: coda
+Depends: R (>= 3.5.0), rstan, ggplot2, bayesplot
+Imports: loo, logspline, LaplacesDemon
 VignetteBuilder: knitr
 Suggests:
     reshape2,
     gridExtra,
-    mcmcse,
     bridgesampling,
     testthat,
     knitr,
-    rmarkdown
+    rmarkdown,
+    covr
+URL: https://github.com/michelescandola/bmscstan
+BugReports: https://github.com/michelescandola/bmscstan
 RoxygenNote: 7.2.1
